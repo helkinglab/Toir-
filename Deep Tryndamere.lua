@@ -354,7 +354,6 @@ end
 
 function Tryndamere:Qauto()
     if not self.isRactive and CanCast(_Q) and self.outcombo and GetPercentMP(myHero.Addr) >= self.LMana and self.AQ and GetPercentHP(myHero.Addr) < self.AQlow then
-      if not self.incombo then
 		CastSpellTarget(myHero.Addr, _Q)
     end
 end
