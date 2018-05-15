@@ -54,7 +54,6 @@ function XinZhao:TopLane()
     ["VelkozR"] = true,
     ["InfiniteDuress"] = true,
     ["XerathLocusOfPower2"] = true,
-    ["SivirQ"] = true,
 	}
 				
 	Callback.Add("Update", function(...) self:OnUpdate(...) end)
