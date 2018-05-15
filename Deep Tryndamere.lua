@@ -135,8 +135,9 @@ function Tryndamere:Jungle()
 }	
 
   self.isRactive = false
-  self.incombo = false
+  self.incomboR = false
   self.outcombo = false
+  self.Rfoff = false
 	
  	Callback.Add("Update", function(...) self:OnUpdate(...) end)
     Callback.Add("Tick", function() self:OnTick() end) 
@@ -336,7 +337,7 @@ function Tryndamere:OnUpdateBuff(source,unit,buff,stacks)
       if buff.Name == "UndyingRage" and unit.IsMe then
             self.isRactive = true
           end
-		  end
+end
 		  
 function Tryndamere:OnRemoveBuff(unit,buff)
       if buff.Name == "UndyingRage" and unit.IsMe then
@@ -345,17 +346,31 @@ function Tryndamere:OnRemoveBuff(unit,buff)
 end	  
 
 function Tryndamere:comboRcheck()
-      if GetKeyPress(self.Combo) > 0 and UseR ~= 0 and self.R:IsReady() then
-            self.incombo = true;
+      if GetKeyPress(self.Combo) > 0 then
+            self.incomboR = true;
         else
             self.outcombo = true;
+          end
+end
+
+function Tryndamere:Roffcheck()
+      if not self.R:IsReady() then
+            self.Rfoff = true;
+		else
+            self.Rfoff = false;
           end
 end	
 
 function Tryndamere:Qauto()
-    if not self.isRactive and CanCast(_Q) and self.outcombo and GetPercentMP(myHero.Addr) >= self.LMana and self.AQ and GetPercentHP(myHero.Addr) < self.AQlow then
+	if self.Rfoff then
+    if not self.isRactive then 
+	if self.outcombo then
+	if CanCast(_Q) and GetPercentMP(myHero.Addr) >= self.LMana and self.AQ and GetPercentHP(myHero.Addr) < self.AQlow then
 		CastSpellTarget(myHero.Addr, _Q)
     end
+end
+end
+end
 end
 
 function Tryndamere:OnTick()
@@ -369,7 +384,8 @@ function Tryndamere:OnTick()
         self:WLow()
 		self:Epos()
     end 
- 
+
+	self:Roffcheck()	
 	self:comboRcheck()
 	self:Rauto()
 	self:RautoTur()
