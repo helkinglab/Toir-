@@ -362,13 +362,11 @@ function Tryndamere:Roffcheck()
 end	
 
 function Tryndamere:Qauto()
-	if self.Rfoff then
     if not self.isRactive then 
-	if self.outcombo then
+	if self.outcombo and self.Rfoff then
 	if CanCast(_Q) and GetPercentMP(myHero.Addr) >= self.LMana and self.AQ and GetPercentHP(myHero.Addr) < self.AQlow then
 		CastSpellTarget(myHero.Addr, _Q)
     end
-end
 end
 end
 end
