@@ -109,6 +109,11 @@ end
    self.AR = self:MenuBool("Auto R on low HP", true)
    self.ARlow = self:MenuSliderInt("%HP to auto R", 20)
  
+   --Clear [[ XinZhao ]]
+   self.LQ = self:MenuBool("Clear Q", true)
+   self.LW = self:MenuBool("Clear W", true)
+   self.LE = self:MenuBool("Clear E", true) 
+ 
    --Draws [[ XinZhao ]]
    self.DW = self:MenuBool("Draw W", true)
    self.DE = self:MenuBool("Draw E", true)
@@ -138,11 +143,18 @@ if not Menu_Begin(self.menu) then return end
        Menu_End()
      end
 
-          if Menu_Begin("Auto Interrupt") then
-			self.Rinterrupt = Menu_Bool("Interrupt Spells With R", self.Rinterrupt, self.menu)
-            Menu_End()
-          end
-	 
+        if Menu_Begin("Auto Interrupt") then
+		self.Rinterrupt = Menu_Bool("Interrupt Spells With R", self.Rinterrupt, self.menu)
+        Menu_End()
+       end
+
+     if Menu_Begin("Clear skills") then
+       self.LQ = Menu_Bool("Use Q to clear", self.LQ, self.menu)
+       self.LW = Menu_Bool("Use W to clear", self.LW, self.menu)
+       self.LE = Menu_Bool("Use E to clear", self.LE, self.menu)
+       Menu_End()
+     end
+	   
      if Menu_Begin("Draws") then
        self.DW = Menu_Bool("Draw W", self.DW, self.menu)
        self.DE = Menu_Bool("Draw E", self.DE, self.menu)
@@ -194,7 +206,7 @@ function XinZhao:OnProcessSpell(unit, spell)
    and IsValidTarget(unit, 500)
    then
      __PrintTextGame("Xin Zhao tried to interrupt a skill with R")
-	 			target = GetAIHero(unit.Addr)
+		target = GetAIHero(unit.Addr)
         CastSpellTarget(unit.Addr, _R)
 	end
 	end
@@ -213,7 +225,10 @@ function XinZhao:OnAfterAttack(unit, target)
 		local jungle = GetUnit(minions)
 		if jungle.Type == 3 then
 
-	  if GetKeyPress(self.LaneClear) > 0 and CanCast(_Q) then
+	  if GetKeyPress(self.LaneClear) > 0
+	  and CanCast(_Q)
+	  and self.LQ
+	  then
 		if jungle ~= nil and GetDistance(jungle) < self.Q.range then
 			self.Q:Cast(myHero.Addr)
         end						
@@ -352,14 +367,14 @@ function XinZhao:CountEnemiesInRange(pos, range)
 end
 
 function XinZhao:FarmJungle()
-	if CanCast(_W) and (GetType(GetTargetOrb()) == 3) then
+	if CanCast(_W) and self.LW and (GetType(GetTargetOrb()) == 3) then
 		if (GetObjName(GetTargetOrb()) ~= "PlantSatchel" and GetObjName(GetTargetOrb()) ~= "PlantHealth" and GetObjName(GetTargetOrb()) ~= "PlantVision") then
 			target = GetUnit(GetTargetOrb())
 	    	local targetPos, HitChance, Position = self.Predc:GetLineCastPosition(target, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero, false)
 			CastSpellToPos(targetPos.x, targetPos.z, _W)
 		end
     end
-	if CanCast(_E) and (GetType(GetTargetOrb()) == 3) then
+	if CanCast(_E) and self.LE and (GetType(GetTargetOrb()) == 3) then
 		if (GetObjName(GetTargetOrb()) ~= "PlantSatchel" and GetObjName(GetTargetOrb()) ~= "PlantHealth" and GetObjName(GetTargetOrb()) ~= "PlantVision") then
 			target = GetUnit(GetTargetOrb())
 			CastSpellTarget(target.Addr, _E)
