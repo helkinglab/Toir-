@@ -388,7 +388,7 @@ function Irelia:Wharass()
 
 
 function Irelia:CastE()
-    local UseE = GetTargetSelector(1300)
+    local UseE = GetTargetSelector(800)
     if UseE then Enemy = GetAIHero(UseE) end
     if CanCast(_E)
 	and self.CE
@@ -406,7 +406,7 @@ end
 end
 
 function Irelia:Eharass()
-    local UseE = GetTargetSelector(1300)
+    local UseE = GetTargetSelector(900)
     if UseE then Enemy = GetAIHero(UseE) end
     if CanCast(_E)
 	and self.HarE
@@ -421,9 +421,9 @@ end
 end
 
 function Irelia:CastR()
-    local Rcombo = GetTargetSelector(self.R.range)
+    local Rcombo = GetTargetSelector(1000)
     Enemy = GetAIHero(Rcombo)
-    if CanCast(_R) and self.CR and Rcombo ~= 0 and GetDistance(Enemy) < self.R.range and GetPercentHP(Enemy.Addr) < self.CRlow then
+    if CanCast(_R) and self.CR and Rcombo ~= 0 and GetDistance(Enemy) < 900 and GetPercentHP(Enemy.Addr) < self.CRlow then
         local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.R.delay, self.R.width, self.R.range, self.R.speed, myHero, false)
 		if HitChance >= 3 then
 			CastSpellToPos(CEPosition.x, CEPosition.z, _R)
