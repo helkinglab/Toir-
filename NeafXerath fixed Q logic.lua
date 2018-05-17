@@ -24,7 +24,7 @@ function Xerath:Req()
   self.E = Spell(_E,1150)
   self.R = Spell(_R,3200)
 
-  self.Q:SetSkillShot(0.54,math.huge,250,false)
+  self.Q:SetSkillShot(0.54,math.huge,200,false)
   self.W:SetSkillShot(0.7,math.huge,275,false)
   self.E:SetSkillShot(0.2,1400,140,true)
   self.R:SetSkillShot(0.54,math.huge,190,false)
@@ -33,7 +33,7 @@ function Xerath:Req()
   self.qtime = 0
   self.isRactive = false;
   self.lastQtime = 0
-  self.lastRtime = extraq
+  self.lastRtime = 0
   self.extraq = 0
   self.rstack = 0
   self.kalanstack = 0
@@ -88,7 +88,7 @@ function Xerath:OnDrawMenu()
   if Menu_Begin(self.menu) then
     if Menu_Begin("Combo Menu") then
       self.Use_Combo_Q = Menu_Bool("Use Combo Q",self.Use_Combo_Q,self.menu)
-      self.Q_Extra = Menu_SliderInt("Wait Extra Range For Q",self.Q_Extra,0,350,self.menu)
+      self.Q_Extra = Menu_SliderInt("Wait Extra Range For Q",self.Q_Extra,0,250,self.menu)
       self.Use_Combo_W = Menu_Bool("Use Combo W",self.Use_Combo_W,self.menu)
       self.Use_Combo_E = Menu_Bool("Use Combo E",self.Use_Combo_E,self.menu)
       Menu_End()
