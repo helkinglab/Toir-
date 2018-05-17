@@ -100,7 +100,7 @@ function Irelia:IreliaMenus()
 	
     --Harass
     self.HarE = self:MenuBool("Harass E", true)
-    self.HarEdis = self:MenuSliderInt("Harass max E Distance", 900)
+    self.HarEdis = self:MenuSliderInt("Harass max E Distance", 700)
     self.HarQ = self:MenuBool("Harass Q", true)
     self.HarQdis = self:MenuSliderInt("Harass min Q Distance", 250)
     self.HarW = self:MenuBool("Harass Q", true)
@@ -138,7 +138,7 @@ if not Menu_Begin(self.menu) then return end
 			self.CW = Menu_Bool("Combo W", self.CW, self.menu)
             self.CWdis = Menu_SliderInt("Combo max W range", self.CWdis, 0, 500, self.menu)
 			self.CE = Menu_Bool("Combo E", self.CE, self.menu)
-            self.CEdis = Menu_SliderInt("Combo minimum E distance", self.CEdis, 0, 900, self.menu)
+            self.CEdis = Menu_SliderInt("Combo minimum E distance", self.CEdis, 0, 800, self.menu)
             self.CR = Menu_Bool("Combo R", self.CR, self.menu)
             self.CRlow = Menu_SliderInt("Enemy min HP % for Combo R", self.CRlow, 0, 100, self.menu)
 			Menu_End()
@@ -147,7 +147,7 @@ if not Menu_Begin(self.menu) then return end
 			self.HarQ = Menu_Bool("Harass Q on marked enemies", self.HarQ, self.menu)
             self.HarQdis = Menu_SliderInt("Harass min Q Distance", self.HarQdis, 0, 625, self.menu)
 			self.HarE = Menu_Bool("Harass E", self.HarE, self.menu)
-            self.HarEdis = Menu_SliderInt("Harass max E Distance", self.HarEdis, 0, 900, self.menu)
+            self.HarEdis = Menu_SliderInt("Harass max E Distance", self.HarEdis, 0, 800, self.menu)
 			self.HarW = Menu_Bool("Harass E", self.HarW, self.menu)
             self.HarWdis = Menu_SliderInt("Harass max W range", self.HarWdis, 0, 500, self.menu)
 			Menu_End()
@@ -284,7 +284,7 @@ function Irelia:KillEnemy()
     end  
     local RKS = GetTargetSelector(self.R.range)
     Enemy = GetAIHero(RKS)
-    if CanCast(_R) and self.KR and RKS ~= 0 and GetDistance(Enemy) < self.R.range and GetDamage("R", Enemy) > Enemy.HP then
+    if CanCast(_R) and self.KR and RKS ~= 0 and GetDistance(Enemy) < 900 and GetDamage("R", Enemy) > Enemy.HP then
         local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.R.delay, self.R.width, self.R.range, self.R.speed, myHero, false)
 		if HitChance >= 3 then
 			CastSpellToPos(CEPosition.x, CEPosition.z, _R)
@@ -423,7 +423,7 @@ end
 function Irelia:CastR()
     local Rcombo = GetTargetSelector(1000)
     Enemy = GetAIHero(Rcombo)
-    if CanCast(_R) and self.CR and Rcombo ~= 0 and GetDistance(Enemy) < 900 and GetPercentHP(Enemy.Addr) < self.CRlow then
+    if CanCast(_R) and self.CR and Rcombo ~= 0 and GetDistance(Enemy) < 800 and GetPercentHP(Enemy.Addr) < self.CRlow then
         local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.R.delay, self.R.width, self.R.range, self.R.speed, myHero, false)
 		if HitChance >= 3 then
 			CastSpellToPos(CEPosition.x, CEPosition.z, _R)
