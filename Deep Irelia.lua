@@ -70,7 +70,6 @@ function Irelia:OnUpdate()
 	end
 end 
 
---roi cai W de toi tim hieu tiep cung dc. Con cai Q ay ong, lam sao de no Q wait E.
 
 function Irelia:IreliaMenus()
     self.menu = "Deep Irelia"
@@ -363,6 +362,7 @@ function Irelia:OnRemoveBuff(Object, buff)
 		end
 end
 
+--Check if target has buff E
 function Irelia:IsMarked(target)
     return target.HasBuff("ireliamark")
 end
