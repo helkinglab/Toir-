@@ -102,7 +102,7 @@ function Irelia:IreliaMenus()
     self.HarEdis = self:MenuSliderInt("Harass max E Distance", 700)
     self.HarQ = self:MenuBool("Harass Q", true)
     self.HarQdis = self:MenuSliderInt("Harass min Q Distance", 250)
-    self.HarW = self:MenuBool("Harass Q", true)
+    self.HarW = self:MenuBool("Harass W", true)
     self.HarWdis = self:MenuSliderInt("Harass max W range", 500)
 
     --KillSteal [[ Irelia ]]
