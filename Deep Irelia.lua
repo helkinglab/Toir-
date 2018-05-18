@@ -34,7 +34,7 @@ function Irelia:TopLane()
   
     self.Q:SetTargetted()
     self.W:SetSkillShot(0.1, math.huge, 100 ,false)
-    self.E:SetSkillShot(0.1, math.huge, 100 ,false)
+    self.E:SetSkillShot(0.2, 1500, 200 ,false)
     self.R:SetSkillShot(0.1, math.huge, 100 ,false)
 
     Callback.Add("Update", function(...) self:OnUpdate(...) end)	
@@ -78,6 +78,7 @@ function Irelia:IreliaMenus()
     self.CQdis = self:MenuSliderInt("Combo minimum Q distance", 200)
 	self.CW = self:MenuBool("Combo W", true)
     self.CWdis = self:MenuSliderInt("Combo max W range", 400)
+	self.CWHP = self:MenuSliderInt("Combo min HP% to use W", 50)
     self.CE = self:MenuBool("Combo E", true)
     self.CEdis = self:MenuSliderInt("Combo minimum E Distance", 150)
     self.CR = self:MenuBool("Combo R", true)
@@ -136,6 +137,7 @@ if not Menu_Begin(self.menu) then return end
             self.CQdis = Menu_SliderInt("Combo minimum Q distance", self.CQdis, 0, 625, self.menu)
 			self.CW = Menu_Bool("Combo W", self.CW, self.menu)
             self.CWdis = Menu_SliderInt("Combo max W range", self.CWdis, 0, 500, self.menu)
+            self.CWHP = Menu_SliderInt("Combo min HP% to use W", self.CWHP, 0, 100, self.menu)
 			self.CE = Menu_Bool("Combo E", self.CE, self.menu)
             self.CEdis = Menu_SliderInt("Combo minimum E distance", self.CEdis, 0, 800, self.menu)
             self.CR = Menu_Bool("Combo R", self.CR, self.menu)
@@ -306,12 +308,6 @@ function Irelia:CastQ(target)
 			and GetDistance(GetAIHero(target)) > self.CQdis
 			then
 				CastSpellTarget(Enemy.Addr, _Q)
-				DelayAction(
-					function()
-						self:CastQ2(target)
-					end,
-					0.1
-				)
 			end 
 		end
 	end
@@ -319,7 +315,7 @@ end
 
 function Irelia:CastQ2(target)
     if target and target ~= 0 and IsEnemy(target) then
-	if self.Q:IsReady() then
+	if not self.E:IsReady() then
     if CanCast(_Q)
 	and self.CQ
 	and IsValidTarget(target, self.Q.range)
@@ -370,7 +366,11 @@ end
 function Irelia:CastW()
     local UseW = GetTargetSelector(1000)
     if UseW then Enemy = GetAIHero(UseW) end
-    if CanCast(_W) and self.CW and IsValidTarget(Enemy, self.CWdis) then 
+    if CanCast(_W)
+	and self.CW
+	and GetPercentHP(myHero.Addr) < self.CWHP
+	and IsValidTarget(Enemy, self.CWdis)
+	then 
         local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero, false)
 			CastSpellToPos(CEPosition.x, CEPosition.z, _W)
         end
@@ -399,8 +399,11 @@ function Irelia:CastE()
 		if HitChance >= 3 then
 			CastSpellToPos(CEPosition.x, CEPosition.z, _E)
 			DelayAction(function() 
+				CastSpellToPos(CEPosition.x, CEPosition.z, _E)
+			end,1) 
+			DelayAction(function() 
 				CastSpellTarget(Enemy.Addr, _Q)
-			end,0.5)  
+			end,2)  
     end 
 end
 end
@@ -549,9 +552,16 @@ function Irelia:ComboQIreli()
     if self.CQ then
         self:CastQ(target)
     end
-	if self.CQ and not self.E:IsReady() then
-        self:CastQ2(target)
+	--if self.CQ and not self.E:IsReady() then
+      --  self:CastQ2(target)
+  -- end
+		if self.CW and not self.E:IsReady() and not self.Q:IsReady() then
+        self:CastW()
     end
+	if self.CE then
+        self:CastE()
+		end
+	
 end 
 
 function Irelia:JungleIreli()
@@ -589,8 +599,6 @@ function Irelia:OnTick()
 
 	if GetKeyPress(self.Combo) > 0 then
 		self:ComboQIreli()
-        self:CastE()
-        self:CastW()
         self:CastR()
     end
 end 
