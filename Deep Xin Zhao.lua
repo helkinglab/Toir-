@@ -110,12 +110,9 @@ end
    self.ARlow = self:MenuSliderInt("%HP to auto R", 20)
  
    --Clear [[ XinZhao ]]
-    self.JQ = self:MenuBool("Jungle Q", true)
-    self.JQMana = self:MenuSliderInt("Mana Jungle Q %", 30)
-    self.JW = self:MenuBool("Jungle W", true)
-    self.JWMana = self:MenuSliderInt("Mana Jungle W %", 30)
-    self.JE = self:MenuBool("Jungle E", true)
-    self.JEMana = self:MenuSliderInt("Mana Jungle E %", 30)
+   self.LQ = self:MenuBool("Clear Q", true)
+   self.LW = self:MenuBool("Clear W", true)
+   self.LE = self:MenuBool("Clear E", true) 
  
    --Draws [[ XinZhao ]]
    self.DW = self:MenuBool("Draw W", true)
@@ -143,10 +140,6 @@ if not Menu_Begin(self.menu) then return end
        self.CEdis = Menu_SliderInt("Combo minimum E Distance", self.CEdis, 0, 500, self.menu)
        self.CWhar = Menu_Bool("Harass W", self.CWhar, self.menu)
        self.CWHarassdis = Menu_SliderInt("Harass W distance", self.CWHarassdis, 100, 900, self.menu)
-       self.CR = Menu_Bool("Combo R", self.CR, self.menu)
-       self.URS = Menu_SliderInt("Your min HP to combo R", self.URS, 0, 100, self.menu)
-       self.AR = Menu_Bool("Auto R on low HP", self.AR, self.menu)
-       self.ARlow = Menu_SliderInt("%HP to auto R", self.ARlow, 0, 100, self.menu)
        Menu_End()
      end
 
@@ -156,12 +149,9 @@ if not Menu_Begin(self.menu) then return end
        end
 
      if Menu_Begin("Clear skills") then
-			self.JQ = Menu_Bool("Jungle Q", self.JQ, self.menu)
-            self.JQMana = Menu_SliderInt("Min MP % for using Jungle Q", self.JQMana, 0, 100, self.menu)
-			self.JW = Menu_Bool("Jungle W", self.JW, self.menu)
-            self.JWMana = Menu_SliderInt("Min MP % for using Jungle W", self.JWMana, 0, 100, self.menu)
-			self.JE = Menu_Bool("Jungle E", self.JE, self.menu)
-            self.JEMana = Menu_SliderInt("Min MP % for using Jungle E", self.JEMana, 0, 100, self.menu)
+       self.LQ = Menu_Bool("Use Q to clear", self.LQ, self.menu)
+       self.LW = Menu_Bool("Use W to clear", self.LW, self.menu)
+       self.LE = Menu_Bool("Use E to clear", self.LE, self.menu)
        Menu_End()
      end
 	   
@@ -172,6 +162,14 @@ if not Menu_Begin(self.menu) then return end
        Menu_End()
      end
   
+     if Menu_Begin("Configuration [R]") then
+       self.CR = Menu_Bool("Combo R", self.CR, self.menu)
+       self.URS = Menu_SliderInt("Your min HP to combo R", self.URS, 0, 100, self.menu)
+       self.AR = Menu_Bool("Auto R on low HP", self.AR, self.menu)
+       self.ARlow = Menu_SliderInt("%HP to auto R", self.ARlow, 0, 100, self.menu)
+       Menu_End()
+     end
+
 		if Menu_Begin("Mod Skin") then
 			self.Enable_Mod_Skin = Menu_Bool("Enable Mod Skin", self.Enable_Mod_Skin, self.menu)
 			self.Set_Skin = Menu_SliderInt("Set Skin", self.Set_Skin, 0, 20, self.menu)
@@ -229,8 +227,7 @@ function XinZhao:OnAfterAttack(unit, target)
 
 	  if GetKeyPress(self.LaneClear) > 0
 	  and CanCast(_Q)
-	  and self.JQ
-	  and GetPercentMP(myHero.Addr) >= self.JQMana
+	  and self.LQ
 	  then
 		if jungle ~= nil and GetDistance(jungle) < self.Q.range then
 			self.Q:Cast(myHero.Addr)
@@ -283,11 +280,7 @@ end
 function XinZhao:Rlow()
     local UseR = GetTargetSelector(1000)
     if UseR then Enemy = GetAIHero(UseR) end
-    if CanCast(_R)
-	and	self.AR
-	and IsValidTarget(Enemy, 1000)
-	and GetPercentHP(myHero.Addr) < self.ARlow
-	then 
+    if CanCast(_R) and self.AR and IsValidTarget(Enemy, 1000) and GetPercentHP(myHero.Addr) < self.ARlow then 
         CastSpellTarget(myHero.Addr, _R)
     end 
 end 
@@ -374,22 +367,14 @@ function XinZhao:CountEnemiesInRange(pos, range)
 end
 
 function XinZhao:FarmJungle()
-	if CanCast(_W)
-	and self.JW
-	and GetPercentMP(myHero.Addr) >= self.JWMana
-	and (GetType(GetTargetOrb()) == 3)
-	then
+	if CanCast(_W) and self.LW and (GetType(GetTargetOrb()) == 3) then
 		if (GetObjName(GetTargetOrb()) ~= "PlantSatchel" and GetObjName(GetTargetOrb()) ~= "PlantHealth" and GetObjName(GetTargetOrb()) ~= "PlantVision") then
 			target = GetUnit(GetTargetOrb())
 	    	local targetPos, HitChance, Position = self.Predc:GetLineCastPosition(target, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero, false)
 			CastSpellToPos(targetPos.x, targetPos.z, _W)
 		end
     end
-	if CanCast(_E)
-	and self.JE
-	and GetPercentMP(myHero.Addr) >= self.JEMana
-	and	(GetType(GetTargetOrb()) == 3)
-	then
+	if CanCast(_E) and self.LE and (GetType(GetTargetOrb()) == 3) then
 		if (GetObjName(GetTargetOrb()) ~= "PlantSatchel" and GetObjName(GetTargetOrb()) ~= "PlantHealth" and GetObjName(GetTargetOrb()) ~= "PlantVision") then
 			target = GetUnit(GetTargetOrb())
 			CastSpellTarget(target.Addr, _E)
