@@ -78,8 +78,8 @@ function Irelia:IreliaMenus()
     self.CQdis = self:MenuSliderInt("Combo minimum Q distance", 200)
 	self.CW = self:MenuBool("Combo W", true)
     self.CWdis = self:MenuSliderInt("Combo max W range", 400)
+	self.CWHP = self:MenuSliderInt("Combo min HP% to use W", 50)
     self.CE = self:MenuBool("Combo E", true)
-    self.CEdis = self:MenuSliderInt("Combo minimum E Distance", 150)
     self.CR = self:MenuBool("Combo R", true)
     self.CRlow = self:MenuSliderInt("HP Minimum %", 90)
    
@@ -107,7 +107,6 @@ function Irelia:IreliaMenus()
 
     --KillSteal [[ Irelia ]]
     self.KQ = self:MenuBool("KillSteal > Q", true)
-    self.KE = self:MenuBool("KillSteal > E", false)
     self.KR = self:MenuBool("KillSteal > R", true)
 
     --Draws [[ Irelia ]]
@@ -135,9 +134,9 @@ if not Menu_Begin(self.menu) then return end
             self.CQ = Menu_Bool("Combo Q", self.CQ, self.menu)
             self.CQdis = Menu_SliderInt("Combo minimum Q distance", self.CQdis, 0, 625, self.menu)
 			self.CW = Menu_Bool("Combo W", self.CW, self.menu)
+            self.CWHP = Menu_SliderInt("Combo min HP% to use W", self.CWHP, 0, 100, self.menu)
             self.CWdis = Menu_SliderInt("Combo max W range", self.CWdis, 0, 500, self.menu)
 			self.CE = Menu_Bool("Combo E", self.CE, self.menu)
-            self.CEdis = Menu_SliderInt("Combo minimum E distance", self.CEdis, 0, 800, self.menu)
             self.CR = Menu_Bool("Combo R", self.CR, self.menu)
             self.CRlow = Menu_SliderInt("Enemy min HP % for Combo R", self.CRlow, 0, 100, self.menu)
 			Menu_End()
@@ -147,7 +146,7 @@ if not Menu_Begin(self.menu) then return end
             self.HarQdis = Menu_SliderInt("Harass min Q Distance", self.HarQdis, 0, 625, self.menu)
 			self.HarE = Menu_Bool("Harass E", self.HarE, self.menu)
             self.HarEdis = Menu_SliderInt("Harass max E Distance", self.HarEdis, 0, 800, self.menu)
-			self.HarW = Menu_Bool("Harass E", self.HarW, self.menu)
+			self.HarW = Menu_Bool("Harass W", self.HarW, self.menu)
             self.HarWdis = Menu_SliderInt("Harass max W range", self.HarWdis, 0, 500, self.menu)
 			Menu_End()
         end
@@ -177,7 +176,6 @@ if not Menu_Begin(self.menu) then return end
         end
         if Menu_Begin("KillSteal") then
             self.KQ = Menu_Bool("KillSteal with Q", self.KQ, self.menu)
-            self.KE = Menu_Bool("KillSteal with E", self.KE, self.menu)
             self.KR = Menu_Bool("KillSteal with R", self.KR, self.menu)
 			Menu_End()
         end
@@ -230,22 +228,6 @@ function Irelia:LaneFarmeQ()
     end 
 end 
 
-function Irelia:GetGapMinion(target)
-    GetAllUnitAroundAnObject(myHero.Addr, 1500)
-    local GabrityMinion = nil
-    local CountIsMinion = 0
-    local units = pUnit
-    for i, unit in pairs(units) do
-        if unit and unit ~= 0 and IsMinion(unit) and IsEnemy(unit) and IsDead(unit) and IsInFog(unit) and GetTargetableToTeam(unit) == 4 and GetDistance(GetUnit(unit)) < 375 then
-            if GetDistance(self:DashEndPos(GetUnit(unit)), target) < GetDistance(target) and CountIsMinion < GetDistance(GetUnit(unit)) then
-                CountIsMinion = GetDistance(GetUnit(unit))
-                GabrityMinion = unit
-            end
-        end
-    end
-    return GabrityMinion
-end
-
 function Irelia:OnDraw()
     if self.DQWER then
 
@@ -272,15 +254,7 @@ function Irelia:KillEnemy()
     Enemy = GetAIHero(QKS)
     if CanCast(_Q) and self.KQ and QKS ~= 0 and GetDistance(Enemy) < self.Q.range and GetDamage("Q", Enemy) > Enemy.HP then
         CastSpellTarget(Enemy.Addr, Q)
-    end 
-    local EKS = GetTargetSelector(self.E.range)
-    Enemy = GetAIHero(EKS)
-    if CanCast(_E) and self.KE and EKS ~= 0 and GetDistance(Enemy) < self.E.range and GetDamage("E", Enemy) > Enemy.HP then
-        local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.E.delay, self.E.width, self.E.range, self.E.speed, myHero, false)
-		if HitChance >= 2 then
-			CastSpellToPos(CEPosition.x, CEPosition.z, _E)
-        end
-    end  
+    end   
     local RKS = GetTargetSelector(self.R.range)
     Enemy = GetAIHero(RKS)
     if CanCast(_R) and self.KR and RKS ~= 0 and GetDistance(Enemy) < 900 and GetDamage("R", Enemy) > Enemy.HP then
@@ -290,11 +264,6 @@ function Irelia:KillEnemy()
         end
     end  
 end 
-
-local function GetDistanceSqr(p1, p2)
-    p2 = GetOrigin(p2) or GetOrigin(myHero)
-    return (p1.x - p2.x) ^ 2 + ((p1.z or p1.y) - (p2.z or p2.y)) ^ 2
-end
 
 function Irelia:CastQ(target)
     if target and target ~= 0 and IsEnemy(target) then
@@ -306,12 +275,6 @@ function Irelia:CastQ(target)
 			and GetDistance(GetAIHero(target)) > self.CQdis
 			then
 				CastSpellTarget(Enemy.Addr, _Q)
-				DelayAction(
-					function()
-						self:CastQ2(target)
-					end,
-					0.1
-				)
 			end 
 		end
 	end
@@ -369,41 +332,79 @@ end
 
 function Irelia:CastW()
     local UseW = GetTargetSelector(1000)
-    if UseW then Enemy = GetAIHero(UseW) end
-    if CanCast(_W) and self.CW and IsValidTarget(Enemy, self.CWdis) then 
+    if not self.Q:IsReady() and UseW then Enemy = GetAIHero(UseW) end
+    if CanCast(_W) and self.CW and GetPercentHP(myHero.Addr) < self.CWHP and IsValidTarget(Enemy, self.CWdis) then 
         local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero, false)
 			CastSpellToPos(CEPosition.x, CEPosition.z, _W)
+			DelayAction(function() 
+				CastSpellTarget(Enemy.Addr, _Q)
+			end,3)  
         end
     end 
 
 	
 function Irelia:Wharass()
     local UseW = GetTargetSelector(1000)
-    if UseW then Enemy = GetAIHero(UseW) end
+    if not self.Q:IsReady() and UseW then Enemy = GetAIHero(UseW) end
     if CanCast(_W) and self.HarW and IsValidTarget(Enemy, self.HarWdis) then 
         local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero, false)
-			CastSpellToPos(CEPosition.x, CEPosition.z, _W)
+			CastSpellToPos(CEPosition.x, CEPosition.z, _W) 
         end
     end 
 
+function Irelia:CheckWalls(enemyPos)
+	local distance = GetDistance(enemyPos)
+	local myHeroPos = Vector(myHero.x, myHero.y, myHero.z)
+
+	for i = 100 , 900, 100 do
+		local qPos = Vector(enemyPos.x + i, enemyPos.y + i, enemyPos.z)
+		--pos = myHeroPos:Extended(enemyPos, distance + 60 * i)
+		if IsWall(qPos.x, qPos.y, qPos.z) then
+			return qPos
+		end
+	end
+	--return false
+end
+
+function Irelia:GetELinePreCore(target)
+	local castPosX, castPosZ, unitPosX, unitPosZ, hitChance, _aoeTargetsHitCount = GetPredictionCore(target.Addr, 0, self.E.delay, self.E.width, self.E.range, self.E.speed, myHero.x, myHero.z, false, true, 1, 3, 5, 5, 5, 5)
+	if target ~= nil then
+		 CastPosition = Vector(castPosX, target.y, castPosZ)
+		 HitChance = hitChance
+		 Position = Vector(unitPosX, target.y, unitPosZ)
+		 return CastPosition, HitChance, Position
+	end
+	return nil , 0 , nil
+end
 
 function Irelia:CastE()
-    local UseE = GetTargetSelector(800)
-    if UseE then Enemy = GetAIHero(UseE) end
-    if CanCast(_E)
-	and self.CE
-	and UseE ~= 0
-	and GetDistance(Enemy) > self.CEdis
-	then
-        local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.E.delay, self.E.width, self.E.range, self.E.speed, myHero, false)
-		if HitChance >= 3 then
-			CastSpellToPos(CEPosition.x, CEPosition.z, _E)
+	local TargetE = GetTargetSelector(self.E.range - 150, 1)
+	if TargetE ~= 0 then
+		target = GetAIHero(TargetE)
+		
+		if IsValidTarget(target.Addr, self.E.range - 150) then
+			--local QPos, QHitChance = HPred:GetPredict(self.HPred_Q_M, target, myHero)
+			local CastPosition, HitChance, Position = self:GetELinePreCore(target)
+			local step = GetDistance(CastPosition) / 20
+			for i = 1, 20, 1 do 
+				local p = Vector(myHero):Extended(CastPosition, step * i)
+				if IsWall(p.x, p.y, p.z) then
+					return
+				end
+			end
+
+			if self.CE and HitChance >= 6 then
+				CastSpellToPos(CastPosition.x, CastPosition.z, _E)
+			--elseif GetKeyPress(self.Harass) > 0 and self.Qharras and myHero.MP > 330 and QHitChance >= self.qHC then
+				--CastSpellToPos(QPos.x, QPos.z, _Q)
 			DelayAction(function() 
 				CastSpellTarget(Enemy.Addr, _Q)
-			end,0.5)  
-    end 
+			end,3)  
+					end
+				end
+			end
 end
-end
+	
 
 function Irelia:Eharass()
     local UseE = GetTargetSelector(900)
@@ -431,54 +432,6 @@ function Irelia:CastR()
     end   
 end 
 
-function Irelia:CountEnemyInLine(target)
-	local myHeroPos = Vector(myHero.x, myHero.y, myHero.z)
-    local targetPos = Vector(target.x, target.y, target.z)
-    --local targetPosEx = myHeroPos:Extended(targetPos, 500)
-	local NH = 0
-	for i, heros in ipairs(GetEnemyHeroes()) do
-		if heros ~= nil then
-		local hero = GetUnit(heros)
-			local proj2, pointLine, isOnSegment = VectorPointProjectionOnLineSegment(myHeroPos, targetPos, Vector(hero))
-			--__PrintTextGame(tostring(proj2.z).."--"..tostring(pointLine.z).."--"..tostring(isOnSegment))
-			--__PrintTextGame(tostring(GetDistanceSqr(proj2, pointLine)))
-		    if isOnSegment and (GetDistanceSqr(hero, proj2) <= (65) ^ 2) then
-		        NH = NH + 1
-		    end
-		end
-	end
-    return NH
-
-
-
-	--[[local myHeroPos = Vector(myHero.x, myHero.y, myHero.z)
-    local targetPos = Vector(target.x, target.y, target.z)
-    local targetPosEx = myHeroPos:Extended(targetPos, 500)
-    local NH = 1
-	for i=1, 4 do
-		local h = GetAIHero(GetEnemyHeroes()[i])
-		local proj2, pointLine, isOnSegment = VectorPointProjectionOnLineSegment(myHeroPos, targetPosEx, h)
-		if isOnSegment and GetDistanceSqr(proj2, h) < 65 ^ 2 then
-			NH = NH + 1
-		end
-	end
-	return NH]]
-end
-
-function Irelia:CountEnemiesInRange(pos, range)
-    local n = 0
-    GetAllUnitAroundAnObject(myHero.Addr, 2000)
-    for i, object in ipairs(pUnit) do
-        if GetType(object) == 0 and not IsDead(object) and not IsInFog(object) and GetTargetableToTeam(object) == 4 and IsEnemy(object) then
-        	local objectPos = Vector(GetPos(object))
-          	if GetDistanceSqr(pos, objectPos) <= math.pow(range, 2) then
-            	n = n + 1
-          	end
-        end
-    end
-    return n
-end
-
 function Irelia:JungleMinionsKILL() --SDK Toir+
     GetAllUnitAroundAnObject(myHero.Addr, 2000)
     local result = {}
@@ -504,19 +457,6 @@ function Irelia:FarmQJungle()
 	   and GetDamage("Q", jungle) > jungle.HP
 	   then
 		CastSpellTarget(jungle.Addr, Q)
-       end 
-    end 
-end
-end
-
-function Irelia:FarmQJungleMarked()
-    for i ,jungle in pairs(self:JungleMinionsKILL()) do
-        if jungle ~= 0 then
-	   if GetPercentMP(myHero.Addr) >= self.JQMana
-	   and IsValidTarget(jungle.Addr, self.Q.range)
-	   and self:IsMarked(GetUnit(jungle))
-	   then
-	   	CastSpellTarget(jungle.Addr, Q)
        end 
     end 
 end
@@ -549,9 +489,9 @@ function Irelia:ComboQIreli()
     if self.CQ then
         self:CastQ(target)
     end
-	if self.CQ and not self.E:IsReady() then
-        self:CastQ2(target)
-    end
+	--if self.CQ and not self.E:IsReady() then
+    --    self:CastQ2(target)
+   -- end
 end 
 
 function Irelia:JungleIreli()
