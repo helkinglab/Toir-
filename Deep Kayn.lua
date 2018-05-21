@@ -72,7 +72,6 @@ function Kayn:Jungle()
     ["LuxMaliceCannon"] = true,
     ["zedulttargetmark"] = true,
     ["VladimirHemoplague"] = true,
-	["DrainChannel"] = true,
 	}
 				
 	Callback.Add("Update", function(...) self:OnUpdate(...) end)
@@ -81,7 +80,7 @@ function Kayn:Jungle()
   Callback.Add("DrawMenu", function(...) self:OnDrawMenu(...) end)
 	Callback.Add("ProcessSpell", function(...) self:OnProcessSpell(...) end)
 	
- __PrintTextGame("<b><font color=\"#cffffff00\">Deep Kayn</font></b> <font color=\"#ffffff\">Loaded. Enjoy</font>")
+ __PrintTextGame("<b><font color=\"#cffffff00\">Deep Kayn</font></b> <font color=\"#ffffff\">Loaded. Enjoy The Shadow Reaper</font>")
  end 
  
 --SDK {{Toir+}}
@@ -99,28 +98,6 @@ end
 
 function Kayn:MenuKeyBinding(stringKey, valueDefault)
 	return ReadIniInteger(self.menu, stringKey, valueDefault)
-end
-
-function Kayn:GetQCirclePreCore(target)
-	local castPosX, castPosZ, unitPosX, unitPosZ, hitChance, _aoeTargetsHitCount = GetPredictionCore(target.Addr, 0, self.Q.delay, self.Q.width, self.Q.range, self.Q.speed, myHero.x, myHero.z, false, true, 1, 3, 5, 5, 5, 5)
-	if target ~= nil then
-		 CastPosition = Vector(castPosX, target.y, castPosZ)
-		 HitChance = hitChance
-		 Position = Vector(unitPosX, target.y, unitPosZ)
-		 return CastPosition, HitChance, Position
-	end
-	return nil , 0 , nil
-end
-
-function Kayn:GetWLinePreCore(target)
-	local castPosX, castPosZ, unitPosX, unitPosZ, hitChance, _aoeTargetsHitCount = GetPredictionCore(target.Addr, 1, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero.x, myHero.z, false, false, 1, 5, 5, 5, 5, 5)
-	if target ~= nil then
-		 CastPosition = Vector(castPosX, target.y, castPosZ)
-		 HitChance = hitChance
-		 Position = Vector(unitPosX, target.y, unitPosZ)
-		 return CastPosition, HitChance, Position
-	end
-	return nil , 0 , nil
 end
  
 function Kayn:OnUpdate()
@@ -146,6 +123,12 @@ end
    self.AR = self:MenuBool("Auto R on low HP", true)
    self.ARlow = self:MenuSliderInt("%HP to auto R", 20)
  
+    --Clear [[ Kayn ]]
+    self.JQ = self:MenuBool("Jungle Q", true)
+    self.JQMana = self:MenuSliderInt("Mana Jungle Q %", 30)
+    self.JW = self:MenuBool("Jungle W", true)
+    self.JWMana = self:MenuSliderInt("Mana Jungle W %", 30)
+ 
    --Draws [[ Kayn ]]
    self.DQ = self:MenuBool("Draw Q", true)
    self.DW = self:MenuBool("Draw W", false)
@@ -157,7 +140,7 @@ end
 	self.Harass = self:MenuKeyBinding("Harass", 67)
    
 	  --Modskins
-	  self.Enable_Mod_Skin = self:MenuBool("Enable Mod Skin", true)
+	  self.Enable_Mod_Skin = self:MenuBool("Enable Mod Skin", false)
 	  self.Set_Skin = self:MenuSliderInt("Set Skin", 1) 
  end
  
@@ -168,6 +151,10 @@ if not Menu_Begin(self.menu) then return end
        self.CQ = Menu_Bool("Combo Q", self.CQ, self.menu)
        self.CW = Menu_Bool("Combo W", self.CW, self.menu)
        self.CWhar = Menu_Bool("Harass W", self.CWhar, self.menu)
+       self.CR = Menu_Bool("Combo R", self.CR, self.menu)
+       self.URS = Menu_SliderInt("Your min HP to combo R", self.URS, 0, 100, self.menu)
+       self.AR = Menu_Bool("Auto R on low HP", self.AR, self.menu)
+       self.ARlow = Menu_SliderInt("%HP to auto R", self.ARlow, 0, 100, self.menu)
        Menu_End()
      end
 
@@ -183,15 +170,15 @@ if not Menu_Begin(self.menu) then return end
        self.DR = Menu_Bool("Draw R", self.DR, self.menu)
        Menu_End()
      end
-  
-     if Menu_Begin("Configuration [R]") then
-       self.CR = Menu_Bool("Combo R", self.CR, self.menu)
-       self.URS = Menu_SliderInt("Your min HP to combo R", self.URS, 0, 100, self.menu)
-       self.AR = Menu_Bool("Auto R on low HP", self.AR, self.menu)
-       self.ARlow = Menu_SliderInt("%HP to auto R", self.ARlow, 0, 100, self.menu)
+	 
+     if Menu_Begin("Jungle skills") then
+			self.JQ = Menu_Bool("Jungle Q", self.JQ, self.menu)
+            self.JQMana = Menu_SliderInt("Min MP % for using Jungle Q", self.JQMana, 0, 100, self.menu)
+			self.JW = Menu_Bool("Jungle W", self.JW, self.menu)
+            self.JWMana = Menu_SliderInt("Min MP % for using Jungle W", self.JWMana, 0, 100, self.menu)
        Menu_End()
      end
-
+  
 		if Menu_Begin("Mod Skin") then
 			self.Enable_Mod_Skin = Menu_Bool("Enable Mod Skin", self.Enable_Mod_Skin, self.menu)
 			self.Set_Skin = Menu_SliderInt("Set Skin", self.Set_Skin, 0, 20, self.menu)
@@ -210,25 +197,14 @@ if not Menu_Begin(self.menu) then return end
 
  function Kayn:OnDraw()
   if self.W:IsReady() and self.DW then 
-    DrawCircleGame(myHero.x , myHero.y, myHero.z, self.W.range+320, Lua_ARGB(255,255,255,255))
+    DrawCircleGame(myHero.x , myHero.y, myHero.z, self.W.range+150, Lua_ARGB(255,255,255,255))
   end
   if self.Q:IsReady() and self.DQ then 
     DrawCircleGame(myHero.x , myHero.y, myHero.z, self.Q.range+390, Lua_ARGB(255,255,255,255))
 	end
   if self.R:IsReady() and self.DR then 
-    DrawCircleGame(myHero.x , myHero.y, myHero.z, self.R.range+300, Lua_ARGB(255,255,255,255))
+    DrawCircleGame(myHero.x , myHero.y, myHero.z, self.R.range+80, Lua_ARGB(255,255,255,255))
 	end
-end
-
-function Kayn:GetWLinePreCore(target)
-	local castPosX, castPosZ, unitPosX, unitPosZ, hitChance, _aoeTargetsHitCount = GetPredictionCore(target.Addr, 0, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero.x, myHero.z, false, false, 1, 5, 5, 5, 5, 5)
-	if target ~= nil then
-		 CastPosition = Vector(castPosX, target.y, castPosZ)
-		 HitChance = hitChance
-		 Position = Vector(unitPosX, target.y, unitPosZ)
-		 return CastPosition, HitChance, Position
-	end
-	return nil , 0 , nil
 end
 
 function Kayn:OnProcessSpell(unit, spell)
@@ -238,9 +214,11 @@ function Kayn:OnProcessSpell(unit, spell)
    and self.listSpellInterrup[spell.Name]
    and IsValidTarget(unit, self.W.Range)
    then
-     __PrintTextGame("Kayn tried to interrupt a skill with W")
 			target = GetAIHero(unit.Addr)
-        CastSpellTarget(unit.Addr, _W)
+        local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(target, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero, false)
+		if HitChance >= 2 then
+			CastSpellToPos(CEPosition.x, CEPosition.z, _W)
+	end
 	end
 
 			
@@ -250,12 +228,11 @@ function Kayn:OnProcessSpell(unit, spell)
    and self.listSpellInterrup[spell.Name]
    and IsValidTarget(unit, self.R.Range)
    then
-     __PrintTextGame("Kayn tried evade a skill with R")
 	 			target = GetAIHero(unit.Addr)
         CastSpellTarget(unit.Addr, _R)
 	end
 	end
-			
+				
 function Kayn:Qpos()
     local UseQ = GetTargetSelector(1000)
     if UseQ then Enemy = GetAIHero(UseQ) end
@@ -264,26 +241,57 @@ function Kayn:Qpos()
     end 
 end
 
+function Kayn:GetWLinePreCore(target)
+	local castPosX, castPosZ, unitPosX, unitPosZ, hitChance, _aoeTargetsHitCount = GetPredictionCore(target.Addr, 0, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero.x, myHero.z, false, true, 1, 3, 5, 5, 5, 5)
+	if target ~= nil then
+		 CastPosition = Vector(castPosX, target.y, castPosZ)
+		 HitChance = hitChance
+		 Position = Vector(unitPosX, target.y, unitPosZ)
+		 return CastPosition, HitChance, Position
+	end
+	return nil , 0 , nil
+end
+
 function Kayn:Wlow()
-    local UseW = GetTargetSelector(1000)
-    if UseW then Enemy = GetAIHero(UseW) end
-    if CanCast(_W) and self.CW and IsValidTarget(Enemy, 1000) then 
-        local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero, false)
-		if HitChance >= 2 then
-			CastSpellToPos(CEPosition.x, CEPosition.z, _W)
-        end
-    end 
+	local TargetW = GetTargetSelector(self.W.range - 50, 1)
+	if TargetW ~= 0 then
+		target = GetAIHero(TargetW)
+		
+		if IsValidTarget(target.Addr, self.W.range - 50) then
+			--local QPos, QHitChance = HPred:GetPredict(self.HPred_Q_M, target, myHero)
+			local CastPosition, HitChance, Position = self:GetWLinePreCore(target)
+
+			if self.CW and HitChance >= 6 then
+				CastSpellToPos(CastPosition.x, CastPosition.z, _W)
+			--elseif GetKeyPress(self.Harass) > 0 and self.Qharras and myHero.MP > 330 and QHitChance >= self.qHC then
+				--CastSpellToPos(QPos.x, QPos.z, _Q)
+			--DelayAction(function() 
+				--CastSpellTarget(Enemy.Addr, _Q)
+		--	end,3)  
+					end
+				end
+			end
 end
 
 function Kayn:WHarass()
-    local UseW = GetTargetSelector(1000)
-    if UseW then Enemy = GetAIHero(UseW) end
-    if CanCast(_W) and self.CWhar and IsValidTarget(Enemy, 1000) then 
-        local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero, false)
-		if HitChance >= 2 then
-			CastSpellToPos(CEPosition.x, CEPosition.z, _W)
-        end
-    end 
+	local TargetW = GetTargetSelector(self.W.range - 50, 1)
+	if TargetW ~= 0 then
+		target = GetAIHero(TargetW)
+		
+		if IsValidTarget(target.Addr, self.W.range - 50) then
+			--local QPos, QHitChance = HPred:GetPredict(self.HPred_Q_M, target, myHero)
+			local CastPosition, HitChance, Position = self:GetWLinePreCore(target)
+
+			if self.CWhar and HitChance >= 6 then
+				CastSpellToPos(CastPosition.x, CastPosition.z, _W)
+			--elseif GetKeyPress(self.Harass) > 0 and self.Qharras and myHero.MP > 330 and QHitChance >= self.qHC then
+				--CastSpellToPos(QPos.x, QPos.z, _Q)
+			--DelayAction(function() 
+				--CastSpellTarget(Enemy.Addr, _Q)
+		--	end,3)  
+					end
+				end
+			end
 end
 					
 function Kayn:Rcomp()
@@ -302,66 +310,22 @@ function Kayn:Rlow()
     end 
 end 
 
-function Kayn:CountEnemyInLine(target)
-	local myHeroPos = Vector(myHero.x, myHero.y, myHero.z)
-    local targetPos = Vector(target.x, target.y, target.z)
-    --local targetPosEx = myHeroPos:Extended(targetPos, 500)
-	local NH = 0
-	for i, heros in ipairs(GetEnemyHeroes()) do
-		if heros ~= nil then
-		local hero = GetUnit(heros)
-			local proj2, pointLine, isOnSegment = VectorPointProjectionOnLineSegment(myHeroPos, targetPos, Vector(hero))
-			--__PrintTextGame(tostring(proj2.z).."--"..tostring(pointLine.z).."--"..tostring(isOnSegment))
-			--__PrintTextGame(tostring(GetDistanceSqr(proj2, pointLine)))
-		    if isOnSegment and (GetDistanceSqr(hero, proj2) <= (65) ^ 2) then
-		        NH = NH + 1
-		    end
-		end
-	end
-    return NH
-
-
-
-	--[[local myHeroPos = Vector(myHero.x, myHero.y, myHero.z)
-    local targetPos = Vector(target.x, target.y, target.z)
-    local targetPosEx = myHeroPos:Extended(targetPos, 500)
-    local NH = 1
-	for i=1, 4 do
-		local h = GetAIHero(GetEnemyHeroes()[i])
-		local proj2, pointLine, isOnSegment = VectorPointProjectionOnLineSegment(myHeroPos, targetPosEx, h)
-		if isOnSegment and GetDistanceSqr(proj2, h) < 65 ^ 2 then
-			NH = NH + 1
-		end
-	end
-	return NH]]
-end
-
-function Kayn:CountEnemiesInRange(pos, range)
-    local n = 0
-    GetAllUnitAroundAnObject(myHero.Addr, 2000)
-    for i, object in ipairs(pUnit) do
-        if GetType(object) == 0 and not IsDead(object) and GetTargetableToTeam(object) == 4 and IsEnemy(object) then
-        	local objectPos = Vector(GetPos(object))
-          	if GetDistanceSqr(pos, objectPos) <= math.pow(range, 2) then
-            	n = n + 1
-          	end
-        end
-    end
-    return n
-end
-
 function Kayn:FarmJungle(target)
+	if self.JW and GetPercentMP(myHero.Addr) > self.JWMana then
 	if CanCast(_W) and (GetType(GetTargetOrb()) == 3) then
 		if (GetObjName(GetTargetOrb()) ~= "PlantSatchel" and GetObjName(GetTargetOrb()) ~= "PlantHealth" and GetObjName(GetTargetOrb()) ~= "PlantVision") then
 			target = GetUnit(GetTargetOrb())
 	    	local targetPos, HitChance, Position = self.Predc:GetLineCastPosition(target, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero, false)
 			CastSpellToPos(targetPos.x, targetPos.z, _W)
 		end
+		end
     end
+	if self.JQ and GetPercentMP(myHero.Addr) > self.JQMana then
 	if CanCast(_Q) and (GetType(GetTargetOrb()) == 3) then
 		if (GetObjName(GetTargetOrb()) ~= "PlantSatchel" and GetObjName(GetTargetOrb()) ~= "PlantHealth" and GetObjName(GetTargetOrb()) ~= "PlantVision") then
 			target = GetUnit(GetTargetOrb())
 			CastSpellTarget(target.Addr, _Q)
+		end
 		end
 	end
 end
@@ -373,7 +337,7 @@ function Kayn:OnTick()
   
     if GetKeyPress(self.LaneClear) > 0 then
 		local target = self.menu_ts:GetTarget()	
-		self:FarmJungle()
+		self:FarmJungle(target)
     end
 	
     if GetKeyPress(self.Harass) > 0 then
