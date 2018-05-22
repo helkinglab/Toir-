@@ -260,7 +260,7 @@ if not Menu_Begin(self.menu) then return end
         end
 		if Menu_Begin("Auto") then
 			self.menu_Combo_QendDash = Menu_Bool("Auto Q End Dash", self.menu_Combo_QendDash, self.menu)
-            self.Qinterrupt = Menu_Bool("Evade Spells With Q", self.CQ, self.menu)
+            self.Qinterrupt = Menu_Bool("Evade Spells With Q", self.Qinterrupt, self.menu)
             self.QinterruptHP = Menu_SliderInt("Your min HP% to evade with Q", self.QinterruptHP, 0, 100, self.menu)
             self.Wauto = Menu_Bool("Auto W on low HP", self.Wauto, self.menu)
 			self.WautoHP = Menu_SliderInt("Your min HP% to auto W", self.WautoHP, 0, 100, self.menu)
