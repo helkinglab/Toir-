@@ -202,11 +202,8 @@ function MasterYi:MasterYiMenus()
     self.CQ = self:MenuBool("Combo Q", true)
     self.StopQ = self:MenuBool("Keep Q for evading spells", true)
     self.CQdis = self:MenuSliderInt("Combo minimum Q distance", 200)
---	self.CW = self:MenuBool("Use W to reset AA", false)
---   self.CWHP = self:MenuSliderInt("My max HP% to reset AA with W", 90)
     self.CE = self:MenuBool("Combo E", true)
     self.AR = self:MenuBool("Combo R", true)
-  -- self.ARdis = self:MenuSliderInt("Combo max R Distance", 800)
     self.ARlow = self:MenuSliderInt("Enemy max HP% to R", 90)
    
 	--Auto
@@ -239,7 +236,7 @@ function MasterYi:MasterYiMenus()
     self.DQ = self:MenuBool("Draw Q", true)
 
 	  --Modskins
-	  self.Enable_Mod_Skin = self:MenuBool("Enable Mod Skin", true)
+	  self.Enable_Mod_Skin = self:MenuBool("Enable Mod Skin", false)
 	  self.Set_Skin = self:MenuSliderInt("Set Skin", 5) 
 
     --KeyS [[ MasterYi ]]
@@ -255,12 +252,9 @@ if not Menu_Begin(self.menu) then return end
 		if Menu_Begin("Combo") then
             self.CQ = Menu_Bool("Combo Q", self.CQ, self.menu)
             self.StopQ = Menu_Bool("Keep Q for evading spells", self.StopQ, self.menu)
-            self.CQdis = Menu_SliderInt("Combo minimum Q distance", self.CQdis, 0, 625, self.menu)
---			self.CW = Menu_Bool("Use W to reset AA", self.CW, self.menu)
---           self.CWHP = Menu_SliderInt("My max HP% to reset AA with W", self.CWHP, 0, 100, self.menu)
+            self.CQdis = Menu_SliderInt("Combo minimum Q distance", self.CQdis, 0, 600, self.menu)
 			self.CE = Menu_Bool("Combo E", self.CE, self.menu)
             self.AR = Menu_Bool("Combo R", self.AR, self.menu)
-       --    self.CRdis = Menu_SliderInt("Combo max R Distance", self.CRdis, 0, 950, self.menu)
             self.ARlow = Menu_SliderInt("Enemy max HP% to R", self.ARlow, 0, 100, self.menu)
 			Menu_End()
         end
@@ -456,12 +450,7 @@ function MasterYi:OnAfterAttack(unit, target)
 			then
     			CastSpellTarget(myHero.Addr, _E)
 		end
---		if GetKeyPress(self.Combo) > 0
---			and self.CW
---			and GetPercentHP(myHero.Addr) >= self.CWHP
---			then
---    			CastSpellTarget(myHero.Addr, _W)
---		end
+		
 	for i, minions in ipairs(self:JungleClear()) do
         if minions ~= 0 then
 		local jungle = GetUnit(minions)
@@ -511,54 +500,6 @@ function MasterYi:Rauto()
     if CanCast(R) and UseR ~= 0 and self.AR and IsValidTarget(Enemy, 800) and GetPercentHP(Enemy.Addr) <= self.ARlow then 
         CastSpellTarget(myHero.Addr, _R)
     end 
-end
-
-function MasterYi:CountEnemMasterYinLine(target)
-	local myHeroPos = Vector(myHero.x, myHero.y, myHero.z)
-    local targetPos = Vector(target.x, target.y, target.z)
-    --local targetPosEx = myHeroPos:Extended(targetPos, 500)
-	local NH = 0
-	for i, heros in ipairs(GetEnemyHeroes()) do
-		if heros ~= nil then
-		local hero = GetUnit(heros)
-			local proj2, pointLine, isOnSegment = VectorPointProjectionOnLineSegment(myHeroPos, targetPos, Vector(hero))
-			--__PrintTextGame(tostring(proj2.z).."--"..tostring(pointLine.z).."--"..tostring(isOnSegment))
-			--__PrintTextGame(tostring(GetDistanceSqr(proj2, pointLine)))
-		    if isOnSegment and (GetDistanceSqr(hero, proj2) <= (65) ^ 2) then
-		        NH = NH + 1
-		    end
-		end
-	end
-    return NH
-
-
-
-	--[[local myHeroPos = Vector(myHero.x, myHero.y, myHero.z)
-    local targetPos = Vector(target.x, target.y, target.z)
-    local targetPosEx = myHeroPos:Extended(targetPos, 500)
-    local NH = 1
-	for i=1, 4 do
-		local h = GetAIHero(GetEnemyHeroes()[i])
-		local proj2, pointLine, isOnSegment = VectorPointProjectionOnLineSegment(myHeroPos, targetPosEx, h)
-		if isOnSegment and GetDistanceSqr(proj2, h) < 65 ^ 2 then
-			NH = NH + 1
-		end
-	end
-	return NH]]
-end
-
-function MasterYi:CountEnemiesInRange(pos, range)
-    local n = 0
-    GetAllUnitAroundAnObject(myHero.Addr, 2000)
-    for i, object in ipairs(pUnit) do
-        if GetType(object) == 0 and not IsDead(object) and not IsInFog(object) and GetTargetableToTeam(object) == 4 and IsEnemy(object) then
-        	local objectPos = Vector(GetPos(object))
-          	if GetDistanceSqr(pos, objectPos) <= math.pow(range, 2) then
-            	n = n + 1
-          	end
-        end
-    end
-    return n
 end
 
 function MasterYi:JungleMinionsKILL() --SDK Toir+
