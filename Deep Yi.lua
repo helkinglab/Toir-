@@ -156,7 +156,7 @@ function MasterYi:Jungle()
 }
 
 	MasterYi:aa()
-	--self.isWactive = false
+	self.isWactive = false
 
     Callback.Add("Update", function(...) self:OnUpdate(...) end)	
     Callback.Add("Tick", function() self:OnTick() end) 
@@ -199,9 +199,8 @@ end
 function MasterYi:MasterYiMenus()
     self.menu = "Deep MasterYi"
     --Combo [[ MasterYi ]]
-    self.CQ = self:MenuBool("Combo Q", true)
-    self.StopQ = self:MenuBool("Keep Q for evading spells", true)
-    self.CQdis = self:MenuSliderInt("Combo minimum Q distance", 200)
+    self.ComboQ = self:MenuBool("Combo Q", true)
+    self.HoldQ = self:MenuBool("Keep Q for evading spells", true)
     self.CE = self:MenuBool("Combo E", true)
     self.AR = self:MenuBool("Combo R", true)
     self.ARlow = self:MenuSliderInt("Enemy max HP% to R", 90)
@@ -250,9 +249,8 @@ function MasterYi:OnDrawMenu()
 if not Menu_Begin(self.menu) then return end
 
 		if Menu_Begin("Combo") then
-            self.CQ = Menu_Bool("Combo Q", self.CQ, self.menu)
-            self.StopQ = Menu_Bool("Keep Q for evading spells", self.StopQ, self.menu)
-            self.CQdis = Menu_SliderInt("Combo minimum Q distance", self.CQdis, 0, 600, self.menu)
+            self.ComboQ = Menu_Bool("Combo Q", self.ComboQ, self.menu)
+            self.HoldQ = Menu_Bool("Keep Q for evading spells", self.HoldQ, self.menu)
 			self.CE = Menu_Bool("Combo E", self.CE, self.menu)
             self.AR = Menu_Bool("Combo R", self.AR, self.menu)
             self.ARlow = Menu_SliderInt("Enemy max HP% to R", self.ARlow, 0, 100, self.menu)
@@ -372,15 +370,15 @@ end
 function MasterYi:CastQ()
     local UseQ = GetTargetSelector(1000)
     if UseQ then Enemy = GetAIHero(UseQ) end
-
-		if CanCast(_Q)
-			and self.CQ
-			and IsValidTarget(Enemy, self.Q.range)
-			and GetDistance(GetAIHero(target)) > self.CQdis
-			then
-				CastSpellTarget(Enemy.Addr, _Q)
-			end 
-		end
+	if not self.HoldQ then
+    if CanCast(_Q)
+	and self.ComboQ
+	and IsValidTarget(Enemy, self.Q.range)
+	then
+        CastSpellTarget(Enemy.Addr, _Q)
+    end 
+	end
+	end
 
 function MasterYi:QHarass()
     local UseQ = GetTargetSelector(1000)
@@ -418,15 +416,17 @@ function MasterYi:autoQtoEndDash()
 			end
 
   function MasterYi:OnUpdateBuff(source,unit,buff,stacks)
-      if buff.Name == "Meditate" and unit.IsMe then
+  --__PrintTextGame(buff.Name)
+	  if buff.Name == "Meditate" and unit.IsMe then
             SetLuaMoveOnly(true)
             SetLuaBasicAttackOnly(true)
           end
   end
 
   function MasterYi:OnRemoveBuff(unit,buff)
-      if buff.Name == "Meditate" and unit.IsMe then
-			SetLuaMoveOnly(false)
+  --__PrintTextGame(buff.Name)
+	  if buff.Name == "Meditate" and unit.IsMe then
+            SetLuaMoveOnly(false)
             SetLuaBasicAttackOnly(false)
           end
    end
@@ -480,9 +480,25 @@ function MasterYi:CastW()
 	and IsValidTarget(Enemy, self.W.range)
 	then 
         self.W:Cast(myHero.Addr)
+		DelayAction(function() self:CastW(myHero) end, 4)
         end
     end 
 
+function MasterYi:WautoTur()
+    GetAllUnitAroundAnObject(myHero.Addr, 775)
+	local objects = pUnit
+	for k,v in pairs(objects) do
+    if IsTurret(v) and not IsDead(v) and IsEnemy(v) 
+	and CanCast(W) 
+	and self.Wauto 
+	and GetPercentHP(myHero.Addr) < self.WautoHP
+	then 
+        self.W:Cast(myHero.Addr)
+		DelayAction(function() self:CastW(myHero) end, 4)
+    end 
+end
+end
+	
 function MasterYi:Eharass()
     local UseE = GetTargetSelector(1000)
     if UseE then Enemy = GetAIHero(UseE) end
@@ -531,24 +547,19 @@ function MasterYi:FarmQJungle()
     end 
 end
 end
-
-function MasterYi:ComboYi()
-	if not self.StopQ then
-     self:castQ()
-	end
-end
 	
 function MasterYi:OnTick()
     if IsDead(myHero.Addr) or IsTyping() or IsDodging() then return end
 
     self:KillEnemy()
-    self:Rauto()
+	self:CastW()
+	self:WautoTur()
 	
     if GetKeyPress(self.LastHit) > 0 then	
         self:FarmeQ()
     end
 	
-    if GetKeyPress(self.Harass) > 0 then	
+    if GetKeyPress(self.Harass) > 0 then
         self:Eharass()
         self:QHarass()
     end
@@ -559,7 +570,7 @@ function MasterYi:OnTick()
     end
 
 	if GetKeyPress(self.Combo) > 0 then
-		self:ComboYi()
+		self:CastQ()
 		self:Rauto()
     end
 end 
