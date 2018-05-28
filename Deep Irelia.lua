@@ -408,8 +408,11 @@ function Irelia:CastW()
         local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero, false)
 			CastSpellToPos(CEPosition.x, CEPosition.z, _W)
 			DelayAction(function() 
+				CastSpellToPos(CEPosition.x, CEPosition.z, _W)
+			end,1.4)
+			DelayAction(function() 
 				CastSpellTarget(Enemy.Addr, _Q)
-			end,3)  
+			end,0.1)  
         end
     end 
 
@@ -420,6 +423,9 @@ function Irelia:Wharass()
     if CanCast(_W) and self.HarW and IsValidTarget(Enemy, self.HarWdis) then 
         local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero, false)
 			CastSpellToPos(CEPosition.x, CEPosition.z, _W) 
+			DelayAction(function() 
+				CastSpellToPos(CEPosition.x, CEPosition.z, _W)
+			end,1.4)
         end
     end 
 
@@ -437,7 +443,7 @@ function Irelia:CheckWalls(enemyPos)
 	--return false
 end
 
-function Irelia:GetELinePreCore(target)
+function Irelia:GetECirclePreCore(target)
 	local castPosX, castPosZ, unitPosX, unitPosZ, hitChance, _aoeTargetsHitCount = GetPredictionCore(target.Addr, 0, self.E.delay, self.E.width, self.E.range, self.E.speed, myHero.x, myHero.z, false, true, 1, 3, 5, 5, 5, 5)
 	if target ~= nil then
 		 CastPosition = Vector(castPosX, target.y, castPosZ)
@@ -460,13 +466,13 @@ function Irelia:GetRLinePreCore(target)
 end
 
 function Irelia:CastE()
-	local TargetE = GetTargetSelector(self.E.range - 150, 1)
+	local TargetE = GetTargetSelector(self.E.range, 1)
 	if TargetE ~= 0 then
 		target = GetAIHero(TargetE)
 		
-		if IsValidTarget(target.Addr, self.E.range - 150) then
+		if IsValidTarget(target.Addr, self.E.range) then
 			--local QPos, QHitChance = HPred:GetPredict(self.HPred_Q_M, target, myHero)
-			local CastPosition, HitChance, Position = self:GetELinePreCore(target)
+			local CastPosition, HitChance, Position = self:GetECirclePreCore(target)
 			local step = GetDistance(CastPosition) / 20
 			for i = 1, 20, 1 do 
 				local p = Vector(myHero):Extended(CastPosition, step * i)
