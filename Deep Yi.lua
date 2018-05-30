@@ -165,7 +165,7 @@ function MasterYi:Jungle()
     Callback.Add("ProcessSpell", function(...) self:OnProcessSpell(...) end)
     Callback.Add("UpdateBuff", function(unit, buff) self:OnUpdateBuff(source, unit, buff) end)
     Callback.Add("RemoveBuff", function(unit, buff) self:OnRemoveBuff(unit, buff) end)
-	Callback.Add("BeforeAttack", function(...) self:OnBeforeAttack(...) end)
+	Callback.Add("AfterAttack", function(...) self:OnAfterAttack(...) end)
 	
  __PrintTextGame("<b><font color=\"#cffffff00\">Deep MasterYi</font></b> <font color=\"#ffffff\">Loaded. Enjoy The Wuju Bladesman</font>")
  end 
@@ -443,7 +443,7 @@ function MasterYi:JungleClear()
     return result
 end
 
-function MasterYi:OnBeforeAttack(unit, target)
+function MasterYi:OnAfterAttack(unit, target)
 	if unit.IsMe then
     		if GetKeyPress(self.Combo) > 0
 			and self.CE
