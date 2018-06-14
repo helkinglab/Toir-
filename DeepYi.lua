@@ -2,10 +2,15 @@ IncludeFile("Lib\\TOIR_SDK.lua")
 
 MasterYi = class()
 
+local ScriptXan = 2.0
+local NameCreat = "Deep"
+
 function OnLoad()
-    if GetChampName(GetMyChamp()) == "MasterYi" then
-		MasterYi:Jungle()
-	end
+    if myHero.CharName ~= "MasterYi" then return end
+    __PrintTextGame("<b><font color=\"#00FF00\">Champion:</font></b> " ..myHero.CharName.. "<b><font color=\"#FF0000\"> The Wuju Bladesman!</font></b>")
+    __PrintTextGame("<b><font color=\"#00FF00\">Master Yi, v</font></b> " ..ScriptXan)
+    __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..NameCreat)
+	MasterYi:Jungle()
 end
 
 function MasterYi:Jungle()

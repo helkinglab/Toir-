@@ -379,21 +379,6 @@ function XinZhao:CountEnemyInLine(target)
 		end
 	end
     return NH
-
-
-
-	--[[local myHeroPos = Vector(myHero.x, myHero.y, myHero.z)
-    local targetPos = Vector(target.x, target.y, target.z)
-    local targetPosEx = myHeroPos:Extended(targetPos, 500)
-    local NH = 1
-	for i=1, 4 do
-		local h = GetAIHero(GetEnemyHeroes()[i])
-		local proj2, pointLine, isOnSegment = VectorPointProjectionOnLineSegment(myHeroPos, targetPosEx, h)
-		if isOnSegment and GetDistanceSqr(proj2, h) < 65 ^ 2 then
-			NH = NH + 1
-		end
-	end
-	return NH]]
 end
 
 function XinZhao:CountEnemiesInRange(pos, range)

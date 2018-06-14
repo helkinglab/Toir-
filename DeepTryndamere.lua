@@ -2,10 +2,15 @@ IncludeFile("Lib\\TOIR_SDK.lua")
 
 Tryndamere = class()
 
+local ScriptXan = 2.0
+local NameCreat = "Deep"
+
 function OnLoad()
-    if GetChampName(GetMyChamp()) == "Tryndamere" then
-		Tryndamere:Jungle()
-	end
+    if myHero.CharName ~= "Tryndamere" then return end
+    __PrintTextGame("<b><font color=\"#00FF00\">Champion:</font></b> " ..myHero.CharName.. "<b><font color=\"#FF0000\"> The Barbarian King!</font></b>")
+    __PrintTextGame("<b><font color=\"#00FF00\">Tryndamere, v</font></b> " ..ScriptXan)
+    __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..NameCreat)
+	Tryndamere:Jungle()
 end
 
 function Tryndamere:Jungle()
@@ -147,7 +152,7 @@ function Tryndamere:Jungle()
     Callback.Add("UpdateBuff", function(unit, buff) self:OnUpdateBuff(source, unit, buff) end)
     Callback.Add("RemoveBuff", function(unit, buff) self:OnRemoveBuff(unit, buff) end)
 	
- __PrintTextGame("<b><font color=\"#cffffff00\">Deep Tryndamere</font></b> <font color=\"#ffffff\">Loaded successfully. Enjoy the freeELO</font>")
+ __PrintTextGame("<b><font color=\"#cffffff00\">Deep Tryndamere</font></b> <font color=\"#ffffff\">Loaded successfully. Enjoy The Barbarian King</font>")
  end 
   
 --SDK {{Toir+}}

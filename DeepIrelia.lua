@@ -27,7 +27,7 @@ function Irelia:TopLane()
     self.Predc = VPrediction(true)
 
 	self.isQactive = false;
-	self.qtime = 0	
+--	self.qtime = 0	
 	
     self:IreliaMenus()
 
@@ -385,14 +385,14 @@ end
 function Irelia:OnUpdateBuff(source,unit,buff,stacks)
       if buff.Name == "ireliawdefense" and unit.IsMe then
             self.isQactive = true
-            self.qtime = GetTimeGame()
+--            self.qtime = GetTimeGame()
 		end
 	end
 
 function Irelia:OnRemoveBuff(Object, buff)
       if buff.Name == "ireliawdefense" and unit.IsMe then
             self.isQactive = false
-            self.qtime = 0
+--            self.qtime = 0
 		end
 end
 

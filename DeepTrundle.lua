@@ -2,10 +2,15 @@ IncludeFile("Lib\\TOIR_SDK.lua")
 
 Trundle = class()
 
+local ScriptXan = 2.0
+local NameCreat = "Deep"
+
 function OnLoad()
-    if GetChampName(GetMyChamp()) == "Trundle" then
-		Trundle:TopLane()
-	end
+    if myHero.CharName ~= "Trundle" then return end
+    __PrintTextGame("<b><font color=\"#00FF00\">Champion:</font></b> " ..myHero.CharName.. "<b><font color=\"#FF0000\"> The Troll King!</font></b>")
+    __PrintTextGame("<b><font color=\"#00FF00\">Trundle, v</font></b> " ..ScriptXan)
+    __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..NameCreat)
+	Trundle:TopLane()
 end
 
 function Trundle:TopLane()
@@ -63,7 +68,7 @@ function Trundle:TopLane()
     Callback.Add("DrawMenu", function(...) self:OnDrawMenu(...) end)
     Callback.Add("AfterAttack", function(...) self:OnAfterAttack(...) end)  
 	
- __PrintTextGame("<b><font color=\"#cffffff00\">Deep Trundle</font></b> <font color=\"#ffffff\">Loaded successfully. Enjoy the freeELO</font>")
+ __PrintTextGame("<b><font color=\"#cffffff00\">Deep Trundle</font></b> <font color=\"#ffffff\">Loaded successfully. Enjoy The Troll King</font>")
   end 
   
 --SDK {{Toir+}}
@@ -225,7 +230,7 @@ function Trundle:OnProcessSpell(unit, spell)
 	 			target = GetAIHero(unit.Addr)
 			--local CastPosition, HitChance, Position = vpred:GetLineCastPosition(target, self.W.delay, self.W.width, self.W.range, self.W.speed, myHero, false)
 			local CastPosition, HitChance, Position = self:GetECirclePreCore(target)
-			if HitChance >= 8 then
+			if HitChance >= 6 then
         		CastSpellToPos(CastPosition.x, CastPosition.z, _E)
 	end
 	end
