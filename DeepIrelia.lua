@@ -26,8 +26,14 @@ function Irelia:TopLane()
     self.menu_ts = TargetSelector(1750, 0, myHero, true, true, true)
     self.Predc = VPrediction(true)
 
+    self.Tributo = { }
+    self.CoutTributo = 0
+	
+	self.IreliaE1 = false
+    self.IreliaE2 = false
+	
 	self.isQactive = false;
---	self.qtime = 0	
+	self.qtime = 0	
 	
     self:IreliaMenus()
 
@@ -48,11 +54,53 @@ function Irelia:TopLane()
     Callback.Add("DrawMenu", function(...) self:OnDrawMenu(...) end)
     Callback.Add("UpdateBuff", function(unit, buff, stacks) self:OnUpdateBuff(source, unit, buff, stacks) end)
 	Callback.Add("RemoveBuff", function(unit, buff) self:OnRemoveBuff(unit, buff) end)
+    Callback.Add("OnCreateObject", function(...) self:OnCreateObject(...) end)
+	Callback.Add("OnDeleteObject", function(...) self:OnDeleteObject(...) end)
 	
 	Irelia:aa()
 	
  __PrintTextGame("<b><font color=\"#cffffff00\">Deep Irelia</font></b> <font color=\"#ffffff\">Loaded. Enjoy The Blade Dancer</font>")
  end 
+ 
+ function Irelia:GetHeroes()
+	SearchAllChamp()
+	local t = pObjChamp
+	return t
+end
+
+function Irelia:GetEnemies(range)
+    local t = {}
+    local h = self:GetHeroes()
+    for k, v in pairs(h) do
+        if v ~= 0 then
+            local hero = GetAIHero(v)
+            if hero.IsEnemy and hero.IsValid and hero.Type == 0 and (not range or range > GetDistance(hero)) then
+                table.insert(t, hero)
+            end 
+        end 
+    end
+    return t
+end
+
+function Irelia:OnCreateObject(obj)
+    if obj and obj.IsValid and obj.NetworkId and obj.NetworkId ~= 0 then
+        if string.find(obj.Name, "Irelia_Base_E_Team_Indicator") then
+            self.Tributo[obj.NetworkId] = obj
+            self.CoutTributo = self.CoutTributo + 1
+        end 
+    end 
+end
+
+--Irelia_Base_E_Team_Indicator.troy
+
+function Irelia:OnDeleteObject(obj)
+    if obj and obj.IsValid and obj.NetworkId and obj.NetworkId ~= 0 then
+        if string.find(obj.Name, "Irelia_Base_E_Team_Indicator") then
+            self.Tributo[obj.NetworkId] = nil
+            self.CoutTributo = self.CoutTributo - 1
+        end 
+    end
+end
 
   --SDK {{Toir+}}
 function Irelia:MenuBool(stringKey, bool)
@@ -65,6 +113,10 @@ end
 
 function Irelia:MenuSliderFloat(stringKey, valueDefault)
 	return ReadIniFloat(self.menu, stringKey, valueDefault)
+end
+
+function Irelia:MenuComboBox(stringKey, valueDefault)
+	return ReadIniInteger(self.menu, stringKey, valueDefault)
 end
 
 function Irelia:MenuKeyBinding(stringKey, valueDefault)
@@ -88,6 +140,9 @@ function Irelia:IreliaMenus()
     self.menu = "Deep Irelia"
     --Combo [[ Irelia ]]
     self.CQ = self:MenuBool("Combo Q", true)
+	self.CQEx = self:MenuBool("Use Q Extend", true)
+--	self.CQchase = self:MenuBool("Use Q Chase", true)
+	self.CQgapclose = self:MenuBool("Use Q Gap", true)
     self.CQdis = self:MenuSliderInt("Combo minimum Q distance", 200)
 	self.CW = self:MenuBool("Combo W", true)
     self.CWdis = self:MenuSliderInt("Combo max W range", 400)
@@ -95,6 +150,7 @@ function Irelia:IreliaMenus()
     self.CE = self:MenuBool("Combo E", true)
     self.CR = self:MenuBool("Combo R", true)
     self.CRlow = self:MenuSliderInt("HP Minimum %", 90)
+     self.EMode = self:MenuComboBox("Mode [Q] [ TF ]", 0)
 	
 	self.menu_Combo_QendDash = self:MenuBool("Auto Q End Dash", false)
 	self.menu_Combo_EendDash = self:MenuBool("Auto E End Dash", true)
@@ -123,7 +179,7 @@ function Irelia:IreliaMenus()
 
     --KillSteal [[ Irelia ]]
     self.KQ = self:MenuBool("KillSteal > Q", true)
-    self.KR = self:MenuBool("KillSteal > R", true)
+    self.KR = self:MenuBool("KillSteal > R", false)
 
     --Draws [[ Irelia ]]
     self.DQWER = self:MenuBool("Draw On/Off", true)
@@ -148,13 +204,20 @@ if not Menu_Begin(self.menu) then return end
 
 		if Menu_Begin("Combo") then
             self.CQ = Menu_Bool("Combo Q", self.CQ, self.menu)
+            self.CQEx = Menu_Bool("Use Q on killable minions during combo", self.CQEx, self.menu)
+            self.CQgapclose = Menu_Bool("Use Q to close the gap in combo", self.CQgapclose, self.menu)
+   --         self.CQchase = Menu_Bool("Use Q to chase max Q range", self.CQchase, self.menu)
 			self.menu_Combo_QendDash = Menu_Bool("Auto Q Dasing Enemies", self.menu_Combo_QendDash, self.menu)
             self.CQdis = Menu_SliderInt("Combo minimum Q distance", self.CQdis, 0, 625, self.menu)
+            Menu_Separator()
 			self.CW = Menu_Bool("Combo W", self.CW, self.menu)
             self.CWHP = Menu_SliderInt("Combo min HP% to use W", self.CWHP, 0, 100, self.menu)
             self.CWdis = Menu_SliderInt("Combo max W range", self.CWdis, 0, 500, self.menu)
+            Menu_Separator()
 			self.CE = Menu_Bool("Combo E", self.CE, self.menu)
+            self.EMode = Menu_ComboBox("[E] Mode", self.EMode, "ExtendPos\0MousePos\0\0\0\0", self.menu)
 			self.menu_Combo_EendDash = Menu_Bool("Auto E Dasing Enemies", self.menu_Combo_EendDash, self.menu)
+            Menu_Separator()
             self.CR = Menu_Bool("Combo R", self.CR, self.menu)
             self.CRlow = Menu_SliderInt("Enemy min HP % for Combo R", self.CRlow, 0, 100, self.menu)
 			Menu_End()
@@ -351,20 +414,20 @@ function Irelia:CastQ(target)
 	end
 end
 
-function Irelia:CastQ2(target)
-    if target and target ~= 0 and IsEnemy(target) then
-	if self.Q:IsReady() then
-    if CanCast(_Q)
-	and self.CQ
-	and IsValidTarget(target, self.Q.range)
-	and GetDistance(GetAIHero(target)) > self.CQdis
-	and not self:IsMarked(GetAIHero(target))
+--[[
+function Irelia:CastQChase()
+    local targetC = GetTargetSelector(1000, 0)
+    target = GetAIHero(targetC)
+    if targetC ~= 0 then
+	if self.Q:IsReady() 
+	and IsValidTarget(target, self.Q.Range)
+	and GetDistance(GetAIHero(target)) > 610
+	and not self.E:IsReady()
 	then
-        CastSpellTarget(Enemy.Addr, _Q)
+        CastSpellTarget(target.Addr, _Q)
     end 
 end
-end
-end
+end]]
 
 function Irelia:QHarass(target)
     if target and target ~= 0 and IsEnemy(target) then
@@ -385,14 +448,14 @@ end
 function Irelia:OnUpdateBuff(source,unit,buff,stacks)
       if buff.Name == "ireliawdefense" and unit.IsMe then
             self.isQactive = true
---            self.qtime = GetTimeGame()
+            self.qtime = GetTimeGame()
 		end
 	end
 
 function Irelia:OnRemoveBuff(Object, buff)
       if buff.Name == "ireliawdefense" and unit.IsMe then
             self.isQactive = false
---            self.qtime = 0
+            self.qtime = 0
 		end
 end
 
@@ -443,7 +506,7 @@ function Irelia:CheckWalls(enemyPos)
 	--return false
 end
 
-function Irelia:GetECirclePreCore(target)
+function Irelia:GetELinePreCore(target)
 	local castPosX, castPosZ, unitPosX, unitPosZ, hitChance, _aoeTargetsHitCount = GetPredictionCore(target.Addr, 0, self.E.delay, self.E.width, self.E.range, self.E.speed, myHero.x, myHero.z, false, true, 1, 3, 5, 5, 5, 5)
 	if target ~= nil then
 		 CastPosition = Vector(castPosX, target.y, castPosZ)
@@ -466,48 +529,128 @@ function Irelia:GetRLinePreCore(target)
 end
 
 function Irelia:CastE()
-	local TargetE = GetTargetSelector(self.E.range, 1)
-	if TargetE ~= 0 then
-		target = GetAIHero(TargetE)
-		
+    local mousePos = Vector(GetMousePos())
+    local targetC = GetTargetSelector(2000, 0)
+    target = GetAIHero(targetC)
+    if targetC ~= 0 and self.CE then
+        if self.EMode == 0 then
+            if self.E:IsReady() and IsValidTarget(target, 800) then
+                    if EUser() then
+                    local point2 = Vector(myHero):Extended(Vector(target), -200)
+                    CastSpellToPos(point2.x, point2.z, _E) 
+                end   
+            end
+        end 
+        if self.EMode == 1 then
+            if self.E:IsReady() and IsValidTarget(target, 900) then
+                if EUser() then
+                    CastSpellToPos(mousePos.x, mousePos.z, _E)
+                end 
+            end
+        end 
 		if IsValidTarget(target.Addr, self.E.range) then
-			--local QPos, QHitChance = HPred:GetPredict(self.HPred_Q_M, target, myHero)
-			local CastPosition, HitChance, Position = self:GetECirclePreCore(target)
-			local step = GetDistance(CastPosition) / 20
-			for i = 1, 20, 1 do 
-				local p = Vector(myHero):Extended(CastPosition, step * i)
-				if IsWall(p.x, p.y, p.z) then
-					return
-				end
-			end
+			      --[[ local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.E.delay, self.E.width, self.E.range, self.E.speed, myHero, false)
+		if HitChance >= 3 then
+			CastSpellToPos(CEPosition.x, CEPosition.z, _E)]]
+			target = GetAIHero(Enemy)
+        			local CastPosition, HitChance, Position = self:GetELinePreCore(target)
+    __PrintTextGame(HitChance)
+			if HitChance >= 6 then
+        		CastSpellToPos(CastPosition.x, CastPosition.z, _E)
+            end 
+        end 
+   end                            
+end 
 
-			if self.CE and HitChance >= 6 then
-				CastSpellToPos(CastPosition.x, CastPosition.z, _E)
-			--elseif GetKeyPress(self.Harass) > 0 and self.Qharras and myHero.MP > 330 and QHitChance >= self.qHC then
-				--CastSpellToPos(QPos.x, QPos.z, _Q)
-			DelayAction(function() 
-				CastSpellTarget(Enemy.Addr, _Q)
-			end,3)  
-					end
-				end
-			end
+function Irelia:GetGapMinion(target)
+    GetAllUnitAroundAnObject(myHero.Addr, 1500)
+    local bestMinion = nil
+    local closest = 0
+    local units = pUnit
+    for i, unit in pairs(units) do
+        if unit and unit ~= 0 and IsMinion(unit) and IsEnemy(unit) and not IsDead(unit) and not IsInFog(unit) and GetTargetableToTeam(unit) == 4 and not self:IsMarked(GetUnit(unit)) and GetDistance(GetUnit(unit)) < 475 then
+            if GetDistance(self:DashEndPos(GetUnit(unit)), target) < GetDistance(target) and closest < GetDistance(GetUnit(unit)) then
+                closest = GetDistance(GetUnit(unit))
+                bestMinion = unit
+            end
+        end
+    end
+    return bestMinion
 end
-	
+
+function Irelia:CastQExtende()
+    local mousePos = Vector(GetMousePos())
+    local targetC = GetTargetSelector(2000, 0)
+    target = GetAIHero(targetC)
+    if targetC ~= 0 then
+        if self.Q:IsReady() and self.CQgapclose and IsValidTarget(target, 2000) then
+       --     if self.CoutTributo == 1 and E2User() then
+                local Poits = self:GetGapMinion(target)
+                if Poits and Poits ~= 0 then
+                    CastSpellTarget(Poits, _Q)
+                end 
+            end 
+        end 
+--    end
+    for i, minion in pairs(self:EnemyMinionsTbl(700)) do
+        if minion ~= 0 then
+            if self.CQEx and GetDamage("Q", minion) > minion.HP then
+             --   if --[[ self.CoutTributo == 1 and]]GetDistanceSqr(target, minion) < 1000 * 1000 then    
+                    CastSpellTarget(minion.Addr, _Q)
+                end 
+            end 
+        end 
+    end 
+--end 
+
+function EUser()  
+	if GetSpellNameByIndex(myHero.Addr, _E) == "IreliaE" then 
+		return true 
+	else 
+		return false
+	end
+end
+
+function E2User()  
+	if GetSpellNameByIndex(myHero.Addr, _E) == "IreliaE2" then 
+		return true 
+	else 
+		return false
+	end
+end	
 
 function Irelia:Eharass()
-    local UseE = GetTargetSelector(900)
-    if UseE then Enemy = GetAIHero(UseE) end
-    if CanCast(_E)
-	and self.HarE
-	and UseE ~= 0
-	and GetDistance(Enemy) < self.HarEdis
-	then
-        local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.E.delay, self.E.width, self.E.range, self.E.speed, myHero, false)
+    local mousePos = Vector(GetMousePos())
+    local targetC = GetTargetSelector(2000, 0)
+    target = GetAIHero(targetC)
+    if targetC ~= 0 and self.HarE and GetDistance(Enemy) <= self.HarEdis then
+        if self.EMode == 0 then
+            if self.E:IsReady() and IsValidTarget(target, 800) then
+                    if EUser() then
+                    local point2 = Vector(myHero):Extended(Vector(target), -200)
+                    CastSpellToPos(point2.x, point2.z, _E) 
+                end   
+            end
+        end 
+        if self.EMode == 1 then
+            if self.E:IsReady() and IsValidTarget(target, 900) then
+                if EUser() then
+                    CastSpellToPos(mousePos.x, mousePos.z, _E)
+                end 
+            end
+        end 
+		if IsValidTarget(target.Addr, self.E.range) then
+			      --[[ local CEPosition, HitChance, Position = self.Predc:GetLineCastPosition(Enemy, self.E.delay, self.E.width, self.E.range, self.E.speed, myHero, false)
 		if HitChance >= 3 then
-			CastSpellToPos(CEPosition.x, CEPosition.z, _E)
-    end 
-end
-end
+			CastSpellToPos(CEPosition.x, CEPosition.z, _E)]]
+			target = GetAIHero(Enemy)
+        			local CastPosition, HitChance, Position = self:GetELinePreCore(target)
+			if HitChance >= 4 then
+        		CastSpellToPos(CastPosition.x, CastPosition.z, _E)
+            end 
+        end 
+   end                            
+end 
 
 function Irelia:CastR()
     local Rcombo = GetTargetSelector(1000)
@@ -551,6 +694,19 @@ function Irelia:FarmQJungle()
 end
 end
 
+function Irelia:FarmQMark()
+    for i ,jungle in pairs(self:JungleMinionsKILL()) do
+        if jungle ~= 0 then
+       if GetPercentMP(myHero.Addr) >= self.JQMana
+	   and IsValidTarget(jungle.Addr, self.Q.range)
+	   and self:IsMarked(GetUnit(jungle.Addr)) 
+	   then
+		CastSpellTarget(jungle.Addr, Q)
+       end 
+    end 
+end
+end
+
 
 function Irelia:FarmWJungle()
 	if CanCast(_W) and self.JW and GetPercentMP(myHero.Addr) >= self.JWMana and (GetType(GetTargetOrb()) == 3) then
@@ -578,9 +734,9 @@ function Irelia:ComboQIreli()
     if self.CQ then
         self:CastQ(target)
     end
-	--if self.CQ and not self.E:IsReady() then
-    --    self:CastQ2(target)
-   -- end
+--	if self.CQchase then
+--		self:CastQChase()
+ --  end
 end 
 
 function Irelia:JungleIreli()
@@ -589,6 +745,7 @@ function Irelia:JungleIreli()
     end
 	if self.JQ then
         self:FarmQJungle()
+        self:FarmQMark()
     end
 	if self.JW and not CanCast(_E) then
         self:FarmWJungle()
@@ -621,6 +778,7 @@ function Irelia:OnTick()
         self:CastE()
         self:CastW()
         self:CastR()
+		self:CastQExtende()
     end
 end 
 
