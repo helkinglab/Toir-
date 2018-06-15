@@ -16,8 +16,8 @@ end
 function Ziggs:Midlane()
 
     --Pd
-    SetLuaCombo(true)
-    SetLuaLaneClear(true)
+  --  SetLuaCombo(true)
+  --  SetLuaLaneClear(true)
 
     --Minion [[ SDK Toir+ ]]
     self.EnemyMinions = minionManager(MINION_ENEMY, 2000, myHero, MINION_SORT_HEALTH_ASC)
