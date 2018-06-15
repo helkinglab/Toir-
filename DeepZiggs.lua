@@ -16,8 +16,8 @@ end
 function Ziggs:Midlane()
 
     --Pd
-  --  SetLuaCombo(true)
-  --  SetLuaLaneClear(true)
+   -- SetLuaCombo(true)
+   -- SetLuaLaneClear(true)
 
     --Minion [[ SDK Toir+ ]]
     self.EnemyMinions = minionManager(MINION_ENEMY, 2000, myHero, MINION_SORT_HEALTH_ASC)
@@ -178,7 +178,7 @@ function Ziggs:OnDrawMenu()
 if not Menu_Begin(self.menu) then return end
 
 		if Menu_Begin("Combo") then
-            self.CQ = Menu_Bool("Combo Q", self.CQ, self.menu)
+            self.CQ = Menu_Bool("Combo Q (recommend using Combo Use Q in Initialization)", self.CQ, self.menu)
             self.CW = Menu_Bool("Combo W", self.CW, self.menu)
 			self.CE = Menu_Bool("Combo E", self.CE, self.menu)
 
@@ -474,7 +474,7 @@ function Ziggs:CastE()
 	then 
 	 			target = GetAIHero(Enemy)
         			local CastPosition, HitChance, Position = self:GetECirclePreCore(target)
-			if HitChance >= 6 then
+			if HitChance >= 1 then
         		CastSpellToPos(CastPosition.x, CastPosition.z, _E)
         end
     end 
@@ -489,7 +489,7 @@ function Ziggs:EHarass()
 	then 
 	 			target = GetAIHero(Enemy)
         			local CastPosition, HitChance, Position = self:GetECirclePreCore(target)
-			if HitChance >= 6 then
+			if HitChance >= 1 then
         		CastSpellToPos(CastPosition.x, CastPosition.z, _E)
         end
     end 
