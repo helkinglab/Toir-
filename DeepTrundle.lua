@@ -2,13 +2,13 @@ IncludeFile("Lib\\TOIR_SDK.lua")
 
 Trundle = class()
 
-local ScriptXan = 2.0
+local ScriptXan = 8.12
 local NameCreat = "Deep"
 
 function OnLoad()
     if myHero.CharName ~= "Trundle" then return end
     __PrintTextGame("<b><font color=\"#00FF00\">Champion:</font></b> " ..myHero.CharName.. "<b><font color=\"#FF0000\"> The Troll King!</font></b>")
-    __PrintTextGame("<b><font color=\"#00FF00\">Trundle, v</font></b> " ..ScriptXan)
+    __PrintTextGame("<b><font color=\"#00FF00\">Deep Trundle for LOL version</font></b> " ..ScriptXan)
     __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..NameCreat)
 	Trundle:TopLane()
 end
@@ -330,7 +330,7 @@ end
 function Trundle:FarmeQ()
     self.EnemyMinions:update()
     for i ,minion in pairs(self.EnemyMinions.objects) do
-       if GetPercentMP(myHero.Addr) >= self.AutoQMana and self.AutoQ and IsValidTarget(minion.Addr, GetTrueAttackRange()) and GetDamage("Q", minion) > minion.HP then
+       if GetPercentMP(myHero.Addr) >= self.AutoQMana and self.AutoQ and IsValidTarget(minion.Addr, GetTrueAttackRange()) and GetDamage("Q", minion) > (minion.HP + 40) then
         CastSpellTarget(myHero.Addr, Q)
        end 
     end 
@@ -339,7 +339,7 @@ end
 function Trundle:LaneFarmeQ()
     self.EnemyMinions:update()
     for i ,minion in pairs(self.EnemyMinions.objects) do
-       if GetPercentMP(myHero.Addr) >= self.AutoQMana and self.AutoQ and IsValidTarget(minion.Addr, GetTrueAttackRange()) and GetDamage("Q", minion) > minion.HP then
+       if GetPercentMP(myHero.Addr) >= self.AutoQMana and self.AutoQ and IsValidTarget(minion.Addr, GetTrueAttackRange()) and GetDamage("Q", minion) > (minion.HP + 40) then
         CastSpellTarget(myHero.Addr, Q)
        end 
     end 
