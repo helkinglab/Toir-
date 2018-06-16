@@ -9,7 +9,7 @@ local NameCreat = "Deep"
 function OnLoad()
     if myHero.CharName ~= "Singed" then return end
     __PrintTextGame("<b><font color=\"#00FF00\">Champion:</font></b> " ..myHero.CharName.. "<b><font color=\"#cffffff00\"> The Mad Chemist!</font></b>")
-    __PrintTextGame("<b><font color=\"#00FF00\">Singed, LOL version</font></b> " ..ScriptXan)
+    __PrintTextGame("<b><font color=\"#00FF00\">Singed for LOL version</font></b> " ..ScriptXan)
     __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..NameCreat)
     DeepSinged:__init()
 end
