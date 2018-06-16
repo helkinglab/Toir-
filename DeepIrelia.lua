@@ -34,6 +34,141 @@ function Irelia:TopLane()
 	self.qtime = 0	
 	
     self:IreliaMenus()
+	
+    self.listSpellInterrup = {
+    ["CaitlynAceintheHole"] = true,
+    ["Crowstorm"] = true,
+    ["Drain"] = true,
+    ["ReapTheWhirlwind"] = true,
+	["JhinR"] = true,
+    ["KarthusFallenOne"] = true,
+    ["KatarinaR"] = true,
+    ["LucianR"] = true,
+    ["AlZaharNetherGrasp"] = true,
+    ["MissFortuneBulletTime"] = true,
+    ["AbsoluteZero"] = true,                       
+    ["PantheonRJump"] = true,
+    ["ShenStandUnited"] = true,
+    ["Destiny"] = true,
+    ["UrgotSwap2"] = true,
+    ["VarusQ"] = true,
+    ["VelkozR"] = true,
+    ["InfiniteDuress"] = true,
+    ["XerathLocusOfPower2"] = true,
+	}
+	
+    self.listSpellDash = {
+    ["MaokaiW"] = true,
+    ["Crowstorm"] = true,
+    ["CamilleE"] = true,
+    ["BlindMonkQTwo"] = true,
+	["BlindMonkWOne"] = true,
+    ["NocturneParanoia2"] = true,
+    ["XinZhaoE"] = true,
+    ["PantheonW"] = true,
+    ["AkaliShadowDance"] = true,
+    ["Headbutt"] = true,
+    ["BraumW"] = true,                       
+    ["DianaTeleport"] = true,
+    ["JaxLeapStrike"] = true,
+    ["MonkeyKingNimbus"] = true,
+    ["PoppyE"] = true,
+    ["IreliaGatotsu"] = true,
+    ["LucianE"] = true,
+    ["EzrealArcaneShift"] = true,
+    ["TristanaW"] = true,
+    ["AhriTumble"] = true,
+	["CarpetBomb"] = true,
+	["FioraQ"] = true,
+	["SummonerFlash"] = true,
+	["FioraQ"] = true,
+	["KindredQ"] = true,
+	["RiftWalk"] = true,
+	["FizzETwo"] = true,
+	["FizzE"] = true,
+	["CamilleEDash2"] = true,
+	["AatroxQ"] = true,
+	["RakanW"] = true,
+	["QuinnE"] = true,
+	["ShyvanaTransformLeap"] = true,
+	["ShenE"] = true,
+	["Deceive"] = true,
+	["SejuaniQ"] = true,
+	["KhazixE"] = true,
+	["KhazixELong"] = true,
+	["TryndamereE"] = true,
+	["LeblancW"] = true,
+	["GalioE"] = true,
+	["ZacE"] = true,
+	["ViQ"] = true,
+	["EkkoEAttack"] = true,
+	["TalonQ"] = true,
+	["EkkoE"] = true,
+	["FizzQ"] = true,
+	["GragasE"] = true,
+	["GravesMove"] = true,
+	["OrnnE"] = true,
+	["Pounce"] = true,
+	["RivenFeint"] = true,
+	["KaynQ"] = true,
+	["RenektonSliceAndDice"] = true,
+	["RenektonDice"] = true,
+	["VayneTumble"] = true,
+	["UrgotE"] = true,
+	["JarvanIVDragonStrike"] = true,
+	["WarwickR"] = true,
+	["ZiggsDashWrapper"] = true,
+	["CaitlynEntrapment"] = true,
+	}
+	
+    self.listSpellDangerous = {
+    ["Crowstorm"] = true,
+    ["NocturneParanoia2"] = true,                     
+    ["DianaTeleport"] = true,
+    ["JaxLeapStrike"] = true,
+	["CarpetBomb"] = true,
+	["FizzETwo"] = true,
+	["FizzE"] = true,
+	["KhazixE"] = true,
+	["KhazixELong"] = true,
+	["ViQ"] = true,
+	["EkkoEAttack"] = true,
+	["EkkoE"] = true,
+	["FizzQ"] = true,
+	["GragasE"] = true,
+	["Pounce"] = true,
+    ["rivenizunablade"] = true,
+	["KaynQ"] = true,
+	["RenektonSliceAndDice"] = true,
+	["RenektonDice"] = true,
+	["WarwickR"] = true,
+    ["Anivia2"] = true,
+    ["BrandWildfire"] = true,
+    ["BusterShot"] = true,
+    ["CassiopeiaPetrifyingGaze"] = true,
+    ["DariusExecute"] = true,
+	["InfernalGuardian"] = true,--annieR
+    ["DravenRCast"] = true,
+    ["EvelynnR"] = true,
+    ["GarenR"] = true,
+    ["GravesClusterShot"] = true,
+    ["HecarimUlt"] = true,
+    ["jayceshockblast"] = true,
+	["JinxR"] = true,
+    ["KarthusFallenOne"] = true,
+    ["LeblancChaosOrb"] = true,
+    ["LucianR"] = true,
+    ["LuxMaliceCannon"] = true,
+    ["PantheonRJump"] = true,
+    ["SwainMetamorphism"] = true,
+    ["SyndraR"] = true,
+    ["TalonShadowAssault"] = true,
+    ["VeigarPrimordialBurst"] = true,
+	["vladimirtidesofbloodnuke"] = true,
+    ["zedulttargetmark"] = true,
+    ["ZiggsR"] = true,
+	["jayceshockblastwall"] = true,
+	}
 
 		--Spells
     self.Q = Spell(_Q, 625)
@@ -52,11 +187,45 @@ function Irelia:TopLane()
     Callback.Add("DrawMenu", function(...) self:OnDrawMenu(...) end)
     Callback.Add("UpdateBuff", function(unit, buff, stacks) self:OnUpdateBuff(source, unit, buff, stacks) end)
 	Callback.Add("RemoveBuff", function(unit, buff) self:OnRemoveBuff(unit, buff) end)
+    Callback.Add("ProcessSpell", function(...) self:OnProcessSpell(...) end)
 	
 	Irelia:aa()
 	
  __PrintTextGame("<b><font color=\"#cffffff00\">Deep Irelia</font></b> <font color=\"#ffffff\">Loaded. Enjoy The Blade Dancer</font>")
  end 
+ 
+function Irelia:OnProcessSpell(unit, spell)
+    if self.E:IsReady() and self.menu_interruptE and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) then
+        spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
+        if self.listSpellInterrup[spell.Name] ~= nil and not unit.IsMe then
+            CastSpellToPos(unit.x, unit.z, _E)  
+			            DelayAction(function()
+            CastSpellToPos(unit.x+100, unit.z+100, _E) 
+			end, 0.1)
+        end 
+    end 
+    if self.E:IsReady() and self.menu_interruptE2 and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) then
+        spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
+        if self.listSpellDash[spell.Name] ~= nil and not unit.IsMe then
+            CastSpellToPos(spell.DestPos_x, spell.DestPos_z, _E)
+			            DelayAction(function()
+            CastSpellToPos(spell.DestPos_x+100, spell.DestPos_z+100, _E)
+			end, 0.1)
+        end 
+    end 
+    if self.W:IsReady() and self.menu_interruptW and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) and GetDistance(unit) < 800 then
+        spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
+        if self.listSpellDangerous[spell.Name] ~= nil and not unit.IsMe then
+            CastSpellToPos(unit.x, unit.z, _W) 
+        end 
+    end 
+    if self.R:IsReady() and self.menu_interruptR and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) and GetDistance(unit) < 950 then
+        spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
+        if self.listSpellDangerous[spell.Name] ~= nil and not unit.IsMe then
+            CastSpellToPos(unit.x, unit.z, _R) 
+        end 
+    end 
+end
  
  function Irelia:GetHeroes()
 	SearchAllChamp()
@@ -130,6 +299,11 @@ function Irelia:IreliaMenus()
     self.CR = self:MenuBool("Combo R", true)
     self.CRlow = self:MenuSliderInt("HP Minimum %", 90)
      self.EMode = self:MenuComboBox("Mode [Q] [ TF ]", 0)
+	 
+    self.menu_interruptE2 = self:MenuBool("Use E on dashing enemies", true)
+    self.menu_interruptE = self:MenuBool("Use E to interrupt channeling spells", true)
+    self.menu_interruptW = self:MenuBool("Use W to block dangerous spells", true)
+    self.menu_interruptR = self:MenuBool("Use R to hinder dangerous spells", true)
 	
 	self.menu_Combo_QendDash = self:MenuBool("Auto Q End Dash", false)
 	self.menu_Combo_EendDash = self:MenuBool("Auto E End Dash", true)
@@ -204,6 +378,13 @@ if not Menu_Begin(self.menu) then return end
             Menu_Separator()
             self.CR = Menu_Bool("Combo R", self.CR, self.menu)
             self.CRlow = Menu_SliderInt("Enemy min HP % for Combo R", self.CRlow, 0, 100, self.menu)
+			Menu_End()
+        end
+        if Menu_Begin("Auto") then
+        self.menu_interruptE2 = Menu_Bool("Use E on dashing enemies", self.menu_interruptW, self.menu)
+        self.menu_interruptE = Menu_Bool("Use E to interrupt channeling spells", self.menu_interruptE, self.menu)
+        self.menu_interruptW = Menu_Bool("Use W to tank dangerous spells", self.menu_interruptW, self.menu)
+        self.menu_interruptR = Menu_Bool("Use R to hinder dangerous spells", self.menu_interruptR, self.menu)
 			Menu_End()
         end
         if Menu_Begin("Harass") then
