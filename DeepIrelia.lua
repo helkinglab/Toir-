@@ -122,6 +122,7 @@ function Irelia:IreliaMenus()
 	self.CQgapclose = self:MenuBool("Use Q Gap", false)
 	self.CQgapclosekill = self:MenuBool("Use Q Gap", true)
     self.CQdis = self:MenuSliderInt("Combo minimum Q distance", 200)
+    self.MQdis = self:MenuSliderInt("Combo minimum Q minion distance", 450)
 	self.CW = self:MenuBool("Combo W", true)
     self.CWdis = self:MenuSliderInt("Combo max W range", 400)
 	self.CWHP = self:MenuSliderInt("Combo min HP% to use W", 50)
@@ -182,12 +183,16 @@ if not Menu_Begin(self.menu) then return end
 
 		if Menu_Begin("Combo") then
             self.CQ = Menu_Bool("Combo Q", self.CQ, self.menu)
+            self.CQdis = Menu_SliderInt("Combo minimum Q distance", self.CQdis, 0, 625, self.menu)
+            Menu_Separator()
             self.CQEx = Menu_Bool("Use Q on killable minions during combo", self.CQEx, self.menu)
+            self.MQdis = Menu_SliderInt("Max range for killing minions", self.MQdis, 0, 625, self.menu)
+            Menu_Separator()
             self.CQgapclose = Menu_Bool("Use Q to close the gap in combo", self.CQgapclose, self.menu)
             self.CQgapclosekill = Menu_Bool("Use Q on killable to close the gap in combo", self.CQgapclosekill, self.menu)
+            Menu_Separator()
    --         self.CQchase = Menu_Bool("Use Q to chase max Q range", self.CQchase, self.menu)
 			self.menu_Combo_QendDash = Menu_Bool("Auto Q Dasing Enemies", self.menu_Combo_QendDash, self.menu)
-            self.CQdis = Menu_SliderInt("Combo minimum Q distance", self.CQdis, 0, 625, self.menu)
             Menu_Separator()
 			self.CW = Menu_Bool("Combo W", self.CW, self.menu)
             self.CWHP = Menu_SliderInt("Combo min HP% to use W", self.CWHP, 0, 100, self.menu)
@@ -590,7 +595,7 @@ function Irelia:CastQFaraway()
 --    end
     for i, minion in pairs(self:EnemyMinionsTbl(700)) do
         if minion ~= 0 then
-            if self.CQEx and GetDamage("Q", minion) > (minion.HP + 40) then   
+            if self.CQEx and GetDamage("Q", minion) > (minion.HP + 40) and GetDistance(minion) <= self.MQdis then   
                     CastSpellTarget(minion.Addr, _Q)
                 end 
             end 
