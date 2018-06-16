@@ -2,13 +2,13 @@ IncludeFile("Lib\\TOIR_SDK.lua")
 
 Irelia = class()
 
-local ScriptXan = 2.0
+local ScriptXan = 8.12
 local NameCreat = "Deep"
 
 function OnLoad()
     if myHero.CharName ~= "Irelia" then return end
     __PrintTextGame("<b><font color=\"#00FF00\">Champion:</font></b> " ..myHero.CharName.. "<b><font color=\"#FF0000\"> The Blade Dancer!</font></b>")
-    __PrintTextGame("<b><font color=\"#00FF00\">Irelia, v</font></b> " ..ScriptXan)
+    __PrintTextGame("<b><font color=\"#00FF00\">Irelia, LOL version</font></b> " ..ScriptXan)
     __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..NameCreat)
 	Irelia:TopLane()
 end
@@ -26,9 +26,6 @@ function Irelia:TopLane()
     self.menu_ts = TargetSelector(1750, 0, myHero, true, true, true)
     self.Predc = VPrediction(true)
 
-    self.Tributo = { }
-    self.CoutTributo = 0
-	
 	self.IreliaE1 = false
     self.IreliaE2 = false
 	
@@ -54,8 +51,6 @@ function Irelia:TopLane()
     Callback.Add("DrawMenu", function(...) self:OnDrawMenu(...) end)
     Callback.Add("UpdateBuff", function(unit, buff, stacks) self:OnUpdateBuff(source, unit, buff, stacks) end)
 	Callback.Add("RemoveBuff", function(unit, buff) self:OnRemoveBuff(unit, buff) end)
-    Callback.Add("OnCreateObject", function(...) self:OnCreateObject(...) end)
-	Callback.Add("OnDeleteObject", function(...) self:OnDeleteObject(...) end)
 	
 	Irelia:aa()
 	
@@ -80,26 +75,6 @@ function Irelia:GetEnemies(range)
         end 
     end
     return t
-end
-
-function Irelia:OnCreateObject(obj)
-    if obj and obj.IsValid and obj.NetworkId and obj.NetworkId ~= 0 then
-        if string.find(obj.Name, "Irelia_Base_E_Team_Indicator") then
-            self.Tributo[obj.NetworkId] = obj
-            self.CoutTributo = self.CoutTributo + 1
-        end 
-    end 
-end
-
---Irelia_Base_E_Team_Indicator.troy
-
-function Irelia:OnDeleteObject(obj)
-    if obj and obj.IsValid and obj.NetworkId and obj.NetworkId ~= 0 then
-        if string.find(obj.Name, "Irelia_Base_E_Team_Indicator") then
-            self.Tributo[obj.NetworkId] = nil
-            self.CoutTributo = self.CoutTributo - 1
-        end 
-    end
 end
 
   --SDK {{Toir+}}
@@ -584,7 +559,6 @@ function Irelia:CastQExtende()
     target = GetAIHero(targetC)
     if targetC ~= 0 then
         if self.Q:IsReady() and self.CQgapclose and IsValidTarget(target, 2000) then
-       --     if self.CoutTributo == 1 and E2User() then
                 local Poits = self:GetGapMinion(target)
                 if Poits and Poits ~= 0 then
                     CastSpellTarget(Poits, _Q)
@@ -594,8 +568,7 @@ function Irelia:CastQExtende()
 --    end
     for i, minion in pairs(self:EnemyMinionsTbl(700)) do
         if minion ~= 0 then
-            if self.CQEx and GetDamage("Q", minion) > minion.HP then
-             --   if --[[ self.CoutTributo == 1 and]]GetDistanceSqr(target, minion) < 1000 * 1000 then    
+            if self.CQEx and GetDamage("Q", minion) > minion.HP then   
                     CastSpellTarget(minion.Addr, _Q)
                 end 
             end 
