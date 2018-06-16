@@ -8,7 +8,7 @@ local NameCreat = "Deep"
 function OnLoad()
     if myHero.CharName ~= "Irelia" then return end
     __PrintTextGame("<b><font color=\"#00FF00\">Champion:</font></b> " ..myHero.CharName.. "<b><font color=\"#FF0000\"> The Blade Dancer!</font></b>")
-    __PrintTextGame("<b><font color=\"#00FF00\">Irelia, LOL version</font></b> " ..ScriptXan)
+    __PrintTextGame("<b><font color=\"#00FF00\">Deep Irelia for LOL version</font></b> " ..ScriptXan)
     __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..NameCreat)
 	Irelia:TopLane()
 end
@@ -381,7 +381,7 @@ function Irelia:CastQ(target)
 			and self.CQ
 			and IsValidTarget(target, self.Q.range)
 			and self:IsMarked(GetAIHero(target)) 
-			and GetDistance(GetAIHero(target)) > self.CQdis
+			and GetDistance(GetAIHero(target)) >= self.CQdis
 			then
 				CastSpellTarget(Enemy.Addr, _Q)
 			end 
@@ -529,7 +529,7 @@ function Irelia:CastE()
 			CastSpellToPos(CEPosition.x, CEPosition.z, _E)]]
 			target = GetAIHero(Enemy)
         			local CastPosition, HitChance, Position = self:GetELinePreCore(target)
-    __PrintTextGame(HitChance)
+--    __PrintTextGame(HitChance)
 			if HitChance >= 6 then
         		CastSpellToPos(CastPosition.x, CastPosition.z, _E)
             end 
