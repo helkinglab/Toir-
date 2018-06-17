@@ -176,7 +176,7 @@ function Irelia:TopLane()
  end 
  
 function Irelia:OnProcessSpell(unit, spell)
-    if self.E:IsReady() and self.menu_interruptE and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) then
+    if self.E:IsReady() and self.menu_interruptE and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) and GetDistance(unit) < 980 then
         spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
         if self.listSpellInterrup[spell.Name] ~= nil and not unit.IsMe then
             CastSpellToPos(unit.x, unit.z, _E)  
@@ -185,7 +185,7 @@ function Irelia:OnProcessSpell(unit, spell)
 			end, 0.1)
         end 
     end 
-    if self.E:IsReady() and self.menu_interruptE2 and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) then
+    if self.E:IsReady() and self.menu_interruptE2 and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) and GetDistance(unit) < 980 then
         spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
         if self.listSpellDash[spell.Name] ~= nil and not unit.IsMe then
             CastSpellToPos(spell.DestPos_x, spell.DestPos_z, _E)
