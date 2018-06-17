@@ -121,7 +121,7 @@ function DeepSinged:__init()
 
     
     AddEvent(Enum.Event.OnTick, function(...) self:OnTick(...) end)
-    AddEvent(Enum.Event.OnUpdate, function(...) self:OnUpdate(...) end)
+--    AddEvent(Enum.Event.OnUpdate, function(...) self:OnUpdate(...) end)
     AddEvent(Enum.Event.OnProcessSpell, function(...) self:OnProcessSpell(...) end)
 --    AddEvent(Enum.Event.OnUpdateBuff, function(...) self:OnUpdateBuff(...) end)
 --    AddEvent(Enum.Event.OnRemoveBuff, function(...) self:OnRemoveBuff(...) end)
@@ -546,13 +546,13 @@ function DeepSinged:OnDrawMenu()
 end
 
 function DeepSinged:OnProcessSpell(unit, spell)
-    if self.E:IsReady() and self.menu_interruptE and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) then
+    if self.E:IsReady() and self.menu_interruptE and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) and GetDistance(unit) < 600 then
         spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
         if self.listSpellInterrup[spell.Name] ~= nil and not unit.IsMe then
             CastSpellTarget(unit.Addr, _E)   
         end 
     end 
-    if self.W:IsReady() and self.menu_interruptW and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) then
+    if self.W:IsReady() and self.menu_interruptW and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) and GetDistance(unit) < 1000 then
         spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
         if self.listSpellDash[spell.Name] ~= nil and not unit.IsMe then
             CastSpellToPos(spell.DestPos_x, spell.DestPos_z, _W)   
