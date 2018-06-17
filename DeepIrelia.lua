@@ -284,7 +284,7 @@ function Irelia:IreliaMenus()
     self.menu_interruptE2 = self:MenuBool("Use E on dashing enemies", true)
     self.menu_interruptE = self:MenuBool("Use E to interrupt channeling spells", true)
     self.menu_interruptW = self:MenuBool("Use W to block dangerous spells", true)
-    self.menu_interruptR = self:MenuBool("Use R to hinder dangerous spells", true)
+    self.menu_interruptR = self:MenuBool("Use R to hinder dangerous spells", false)
 	
 	self.menu_Combo_QendDash = self:MenuBool("Auto Q End Dash", false)
 	self.menu_Combo_EendDash = self:MenuBool("Auto E End Dash", true)
