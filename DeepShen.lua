@@ -487,7 +487,11 @@ function DeepShen:KillEnemy()
         if v ~= 0 then
             local target = GetAIHero(v)
             if self.KE and IsValidTarget(target, 600) and self.E:GetDamage(target) > target.HP then 
-                self:CastE(target)
+				local CastPosition, HitChance, Position = self:GetELinePreCore(target)
+--		  	__PrintTextGame(HitChance)
+				if HitChance >= 5 then
+				CastSpellToPos(CastPosition.x, CastPosition.z, _E)
+				end
             end 
         end 
     end
@@ -665,7 +669,7 @@ function DeepShen:OnProcessSpell(unit, spell)
         if self.listSpellInterrup[spell.Name] ~= nil and not unit.IsMe then
 		target = GetAIHero(unit.Addr)
 		local CastPosition, HitChance, Position = self:GetELinePreCore(target)
-		  	__PrintTextGame(HitChance)
+--		  	__PrintTextGame(HitChance)
         if HitChance >= 5 then
 		CastSpellToPos(CastPosition.x, CastPosition.z, _E)
 		end

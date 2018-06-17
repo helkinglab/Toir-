@@ -2,10 +2,15 @@ IncludeFile("Lib\\TOIR_SDK.lua")
 
 Nunu = class()
 
+local ScriptXan = 8.12
+local NameCreat = "Deep"
+
 function OnLoad()
-    if GetChampName(GetMyChamp()) == "Nunu" then
-		Nunu:Jungle()
-	end
+    if myHero.CharName ~= "Nunu" then return end
+    __PrintTextGame("<b><font color=\"#00FF00\">Champion:</font></b> " ..myHero.CharName.. "<b><font color=\"#cffffff00\"> The Yeti Rider!</font></b>")
+    __PrintTextGame("<b><font color=\"#00FF00\">Nunu for LOL version</font></b> " ..ScriptXan)
+    __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..NameCreat)
+    Nunu:Jungle()
 end
 
 function Nunu:Jungle()
@@ -34,6 +39,73 @@ function Nunu:Jungle()
     self.R:SetActive()
 	
 	self.isRactive = false
+	self.vision = false
+	
+    self.listSpellDash = {
+    ["MaokaiW"] = true,
+    ["Crowstorm"] = true,
+    ["CamilleE"] = true,
+    ["BlindMonkQTwo"] = true,
+	["BlindMonkWOne"] = true,
+    ["NocturneParanoia2"] = true,
+    ["XinZhaoE"] = true,
+    ["PantheonW"] = true,
+    ["AkaliShadowDance"] = true,
+    ["Headbutt"] = true,
+    ["BraumW"] = true,                       
+    ["DianaTeleport"] = true,
+    ["JaxLeapStrike"] = true,
+    ["MonkeyKingNimbus"] = true,
+    ["PoppyE"] = true,
+    ["IreliaGatotsu"] = true,
+    ["LucianE"] = true,
+    ["EzrealArcaneShift"] = true,
+    ["TristanaW"] = true,
+    ["AhriTumble"] = true,
+	["CarpetBomb"] = true,
+	["FioraQ"] = true,
+	["SummonerFlash"] = true,
+	["CarpetBomb"] = true,
+	["FioraQ"] = true,
+	["KindredQ"] = true,
+	["RiftWalk"] = true,
+	["FizzETwo"] = true,
+	["FizzE"] = true,
+	["CamilleEDash2"] = true,
+	["AatroxQ"] = true,
+	["RakanW"] = true,
+	["QuinnE"] = true,
+	["JarvanIVDemacianStandard"] = true,
+	["ShyvanaTransformLeap"] = true,
+	["ShenE"] = true,
+	["Deceive"] = true,
+	["SejuaniQ"] = true,
+	["KhazixE"] = true,
+	["KhazixELong"] = true,
+	["TryndamereE"] = true,
+	["LeblancW"] = true,
+	["GalioE"] = true,
+	["ZacE"] = true,
+	["ViQ"] = true,
+	["EkkoEAttack"] = true,
+	["TalonQ"] = true,
+	["EkkoE"] = true,
+	["FizzQ"] = true,
+	["GragasE"] = true,
+	["GravesMove"] = true,
+	["OrnnE"] = true,
+	["Pounce"] = true,
+	["RivenFeint"] = true,
+	["KaynQ"] = true,
+	["RenektonSliceAndDice"] = true,
+	["RenektonDice"] = true,
+	["VayneTumble"] = true,
+	["UrgotE"] = true,
+	["JarvanIVDragonStrike"] = true,
+	["WarwickR"] = true,
+	["ZiggsDashWrapper"] = true,
+	["CaitlynEntrapment"] = true,
+	}
 
     Callback.Add("Update", function(...) self:OnUpdate(...) end)	
     Callback.Add("Tick", function() self:OnTick() end) 
@@ -42,10 +114,11 @@ function Nunu:Jungle()
     Callback.Add("UpdateBuff", function(unit, buff) self:OnUpdateBuff(source, unit, buff) end)
     Callback.Add("RemoveBuff", function(unit, buff) self:OnRemoveBuff(unit, buff) end)
 	Callback.Add("AfterAttack", function(...) self:OnAfterAttack(...) end)
+    Callback.Add("ProcessSpell", function(...) self:OnProcessSpell(...) end)
 	
  __PrintTextGame("<b><font color=\"#cffffff00\">Deep Nunu</font></b> <font color=\"#ffffff\">Loaded. Enjoy The Yeti Rider</font>")
  end 
-
+ 
   --SDK {{Toir+}}
 function Nunu:MenuBool(stringKey, bool)
 	return ReadIniBoolean(self.menu, stringKey, bool)
@@ -69,20 +142,35 @@ function Nunu:OnUpdate()
 	end
 end 
 
+function Nunu:OnProcessSpell(unit, spell)
+    if self.E:IsReady() and self.menu_interruptE and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) and GetDistance(unit) < self.menu_dashrange then
+        spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
+        if self.listSpellDash[spell.Name] ~= nil and not unit.IsMe then
+            CastSpellTarget(unit.Addr, _E)   
+        end 
+    end 
+end
+
 function Nunu:NunuMenus()
     self.menu = "Deep Nunu"
     --Combo [[ Nunu ]]
     self.CQ = self:MenuBool("Combo Q", true)
     self.CQlow = self:MenuSliderInt("My min HP% to Combo Q", 70)
     self.CW = self:MenuBool("Combo W", true)
-    self.CE = self:MenuBool("Combo E", true)
+    self.CE = self:MenuBool("Only E when you have passive", false)
+    self.CEKeep = self:MenuBool("Combo E", true)
     self.CR = self:MenuBool("Combo R", true)
     self.CRlow = self:MenuSliderInt("My min HP% to R", 90)
 	self.CRdis = self:MenuSliderInt("Combo max R Distance", 500)
+	self.CRnum = self:MenuSliderInt("Combo R number", 2)
+    self.CRend = self:MenuBool("End R max range", true)
    
 	--Auto
+    self.menu_interruptE = self:MenuBool("Use E on dashing enemies", true)
+    self.menu_dashrange = self:MenuSliderInt("Spell dash detection range", 900)
 	self.Qauto = self:MenuBool("Auto Q on low HP", true)
     self.QautoHP = self:MenuSliderInt("My min HP% to auto Q", 25)
+    self.AutoLevel = self:MenuBool("Auto level", true)
    
     --Lane
     self.JW = self:MenuBool("Clear W", true)
@@ -132,14 +220,20 @@ if not Menu_Begin(self.menu) then return end
             self.CQlow = Menu_SliderInt("My min HP% to Combo Q", self.CQlow, 0, 100, self.menu)
             self.CW = Menu_Bool("Combo W", self.CW, self.menu)
 			self.CE = Menu_Bool("Combo E", self.CE, self.menu)
+			self.CEKeep = Menu_Bool("Only E when you have passive", self.CEKeep, self.menu)
             self.CR = Menu_Bool("Combo R", self.CR, self.menu)
             self.CRlow = Menu_SliderInt("My max HP% to R", self.CRlow, 0, 100, self.menu)
-            self.CRdis = Menu_SliderInt("Combo max R Distance", self.CRdis, 0, 650, self.menu)
+            self.CRdis = Menu_SliderInt("R when enemies within range", self.CRdis, 0, 650, self.menu)
+            self.CRnum = Menu_SliderInt("R when X enemies within range", self.CRnum, 1, 5, self.menu)
+            self.CRend = Menu_Bool("End R if enemy is at the edge of R AOE", self.CRend, self.menu)
 			Menu_End()
         end
 		if Menu_Begin("Auto") then
+			self.menu_interruptE = Menu_Bool("Use E on dashing enemies", self.menu_interruptE, self.menu)
+			self.menu_dashrange = Menu_SliderInt("Dash spells detection range", self.menu_dashrange, 500, 1200, self.menu)
             self.Qauto = Menu_Bool("Auto Q on low HP", self.Qauto, self.menu)
 			self.QautoHP = Menu_SliderInt("My min HP% to auto Q", self.QautoHP, 0, 100, self.menu)
+			self.AutoLevel = Menu_Bool("Auto Level", self.AutoLevel, self.menu)
 			Menu_End()
         end
         if Menu_Begin("Harass") then
@@ -240,21 +334,49 @@ function Nunu:OnDraw()
       end
 
       if self.DE and self.E:IsReady() then
-        DrawCircleGame(myHero.x, myHero.y, myHero.z, self.E.range+90, Lua_ARGB(255,0,0,255))
+        DrawCircleGame(myHero.x, myHero.y, myHero.z, self.E.range+80, Lua_ARGB(255,0,0,255))
       end
 
       if self.DR and self.R:IsReady() then
-        DrawCircleGame(myHero.x, myHero.y, myHero.z, self.R.range+100, Lua_ARGB(255,0,0,255))
+        DrawCircleGame(myHero.x, myHero.y, myHero.z, self.R.range+90, Lua_ARGB(255,0,0,255))
     end
-   end 
+end 
 
 function Nunu:KillEnemy()
-    local EKS = GetTargetSelector(self.E.range)
-    Enemy = GetAIHero(EKS)
-    if CanCast(_E) and self.KE and EKS ~= 0 and GetDistance(Enemy) <= self.E.range and GetDamage("E", Enemy) > Enemy.HP then
-        CastSpellTarget(Enemy.Addr, E)
-    end 
+	local mousePos = Vector(GetMousePos())
+    for k, v in pairs(self:GetEnemies(1100)) do
+        if v ~= 0 then
+            local target = GetAIHero(v)
+            if self.KE and IsValidTarget(target, 650) and GetDamage("E", target) > target.HP then 
+                self:CastE(target)
+            end
+            if self.isRactive and self.CRend and IsValidTarget(target, 650) and GetDistance(target) > 630 then 
+				MoveToPos(mousePos.x,mousePos.z)
+            end 
+        end 
+    end
 end 
+
+
+function Nunu:GetHeroes()
+	SearchAllChamp()
+	local t = pObjChamp
+	return t
+end
+
+function Nunu:GetEnemies(range)
+    local t = {}
+    local h = self:GetHeroes()
+    for k, v in pairs(h) do
+        if v ~= 0 then
+            local hero = GetAIHero(v)
+            if hero.IsEnemy and hero.IsValid and hero.Type == 0 and (not range or range > GetDistance(hero)) then
+                table.insert(t, hero)
+            end 
+        end 
+    end
+    return t
+end
 
 function Nunu:CastQ()
     for i ,minion in pairs(self:EnemyMinionsTbl()) do
@@ -272,23 +394,25 @@ function Nunu:CastQ()
   function Nunu:OnUpdateBuff(source,unit,buff,stacks)
         	--	__PrintTextGame(buff.Name)
 	  if buff.Name == "AbsoluteZero" and unit.IsMe then
+			self.isRactive = true
             SetLuaMoveOnly(true)
             SetLuaBasicAttackOnly(true)
           end
 	  if buff.Name == "visionary" and unit.IsMe then
-			self.isRactive = true
+			self.vision = true
           end 
   end
 
   function Nunu:OnRemoveBuff(unit,buff)
           	--	__PrintTextGame(buff.Name)
       if buff.Name == "AbsoluteZero" and unit.IsMe then
+			self.isRactive = false
 			SetLuaMoveOnly(false)
             SetLuaBasicAttackOnly(false)
           end
 	  if buff.Name == "visionary" and unit.IsMe then
-			self.isRactive = false
-          end 
+			self.vision = false
+         end 
    end
    
 function Nunu:ToTurrent()
@@ -325,6 +449,7 @@ function Nunu:AutoQ()
 		then
 		if jungle ~= nil and GetDistance(jungle) < 300 then
 			self.Q:Cast(jungle.Addr)
+			
         end
 	end
 	end
@@ -362,14 +487,10 @@ end
 end						
 
 function Nunu:CastW()
-    local UseW = GetTargetSelector(1000)
-    if UseW then Enemy = GetAIHero(UseE) end
     if CanCast(_W)
 	and self.CW
-	and UseW ~= 0
-	and IsValidTarget(Enemy, self.E.range)
 	then 
-        self.W:Cast(myHero.Addr)
+        CastSpellTarget(myHero.Addr, _W)
         end
     end
 
@@ -377,6 +498,19 @@ function Nunu:CastE()
     local UseE = GetTargetSelector(1000)
     if UseE then Enemy = GetAIHero(UseE) end
     if CanCast(_E)
+	and self.CE
+	and UseE ~= 0
+	and IsValidTarget(Enemy, 600)
+	then 
+        self.E:Cast(Enemy.Addr)
+        end
+    end
+	
+function Nunu:CastEKeep()
+    local UseE = GetTargetSelector(1000)
+    if UseE then Enemy = GetAIHero(UseE) end
+    if CanCast(_E)
+	and self.vision
 	and self.CE
 	and UseE ~= 0
 	and IsValidTarget(Enemy, 600)
@@ -404,13 +538,13 @@ function Nunu:CastR()
 	and self.CR
 	and UseR ~= 0
 	and IsValidTarget(Enemy, 400)
-	and GetPercentHP(myHero.Addr) < self.CRlow
-	and GetDistance(Enemy) < self.CRdis
+	and GetPercentHP(myHero.Addr) <= self.CRlow
+	and GetDistance(Enemy) <= self.CRdis
+	and CountEnemyChampAroundObject(myHero.Addr, self.CRdis) >= self.CRnum
 	then 
         self.R:Cast(myHero)
             SetLuaMoveOnly(true)
             SetLuaBasicAttackOnly(true)
-		DelayAction(function() self:CastR(myHero) end, 3)
         end
     end
 
@@ -498,6 +632,15 @@ function Nunu:EFlee()
         end
     end
 	
+function Nunu:CastNunuE()
+	if self.CEKeep then
+	self:CastEKeep()
+	end
+	if not self.CEKeep then
+	self:CastE()
+	end
+    end
+	
 function Nunu:OnTick()
     if IsDead(myHero.Addr) or IsTyping() or IsDodging() then return end
 
@@ -534,7 +677,64 @@ function Nunu:OnTick()
 	if GetKeyPress(self.Combo) > 0 then
 		self:CastQ()
 		self:CastW()
-		self:CastE()
+		self:CastNunuE()
 		self:CastR()
     end
+	
+    if self.AutoLevel then
+        if myHero.Level == 1 then
+            LevelUpSpell(_Q)
+        end 
+        if myHero.Level == 2 then
+            LevelUpSpell(_E)
+        end 
+        if myHero.Level == 3 then
+            LevelUpSpell(_W)
+        end 
+        if myHero.Level == 4 then
+            LevelUpSpell(_Q)
+        end 
+        if myHero.Level == 5 then
+            LevelUpSpell(_Q)
+        end 
+        if myHero.Level == 6 then
+            LevelUpSpell(_R)
+        end 
+        if myHero.Level == 7 then
+            LevelUpSpell(_Q)
+        end 
+        if myHero.Level == 8 then
+            LevelUpSpell(_E)
+        end 
+        if myHero.Level == 9 then
+            LevelUpSpell(_Q)
+        end 
+        if myHero.Level == 10 then
+            LevelUpSpell(_E)
+        end 
+        if myHero.Level == 11 then
+            LevelUpSpell(_R)
+        end 
+        if myHero.Level == 12 then
+            LevelUpSpell(_E)
+        end 
+        if myHero.Level == 13 then
+            LevelUpSpell(_E)
+        end 
+        if myHero.Level == 14 then
+            LevelUpSpell(_W)
+        end 
+        if myHero.Level == 15 then
+            LevelUpSpell(_W)
+        end 
+        if myHero.Level == 16 then
+            LevelUpSpell(_R)
+        end 
+        if myHero.Level == 17 then
+            LevelUpSpell(_W)
+        end 
+        if myHero.Level == 18 then
+            LevelUpSpell(_W)
+        end    
+    end 
 end 
