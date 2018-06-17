@@ -2,14 +2,14 @@ IncludeFile("Lib\\TOIR_SDK.lua")
 
 Tryndamere = class()
 
-local ScriptXan = 2.0
-local NameCreat = "Deep"
+local Version = 8.12
+local Author = "Deep"
 
 function OnLoad()
     if myHero.CharName ~= "Tryndamere" then return end
     __PrintTextGame("<b><font color=\"#00FF00\">Champion:</font></b> " ..myHero.CharName.. "<b><font color=\"#FF0000\"> The Barbarian King!</font></b>")
-    __PrintTextGame("<b><font color=\"#00FF00\">Tryndamere, v</font></b> " ..ScriptXan)
-    __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..NameCreat)
+    __PrintTextGame("<b><font color=\"#00FF00\">Tryndamere for LOL version</font></b> " ..Version)
+    __PrintTextGame("<b><font color=\"#00FF00\">Author: </font></b> " ..Author)
 	Tryndamere:Jungle()
 end
 

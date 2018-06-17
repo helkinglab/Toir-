@@ -2,14 +2,14 @@ IncludeFile("Lib\\TOIR_SDK.lua")
 
 Veigar = class()
 
-local ScriptXan = 2.0
-local NameCreat = "Deep"
+local Version = 8.12
+local Author = "Deep"
 
 function OnLoad()
     if myHero.CharName ~= "Veigar" then return end
     __PrintTextGame("<b><font color=\"#00FF00\">Champion:</font></b> " ..myHero.CharName.. "<b><font color=\"#FF0000\"> The Tiny Master Of Evil!</font></b>")
-    __PrintTextGame("<b><font color=\"#00FF00\">Veigar, v</font></b> " ..ScriptXan)
-    __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..NameCreat)
+    __PrintTextGame("<b><font color=\"#00FF00\">Veigar for LOL version</font></b> " ..Version)
+    __PrintTextGame("<b><font color=\"#00FF00\">Author: </font></b> " ..Author)
 	Veigar:TopLane()
 end
 

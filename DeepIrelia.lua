@@ -2,14 +2,14 @@ IncludeFile("Lib\\TOIR_SDK.lua")
 
 Irelia = class()
 
-local ScriptXan = 8.12
-local NameCreat = "Deep"
+local Version = 8.12
+local Author = "Deep"
 
 function OnLoad()
     if myHero.CharName ~= "Irelia" then return end
     __PrintTextGame("<b><font color=\"#00FF00\">Champion:</font></b> " ..myHero.CharName.. "<b><font color=\"#FF0000\"> The Blade Dancer!</font></b>")
-    __PrintTextGame("<b><font color=\"#00FF00\">Deep Irelia for LOL version</font></b> " ..ScriptXan)
-    __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..NameCreat)
+    __PrintTextGame("<b><font color=\"#00FF00\">Deep Irelia for LOL version</font></b> " ..Version)
+    __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..Author)
 	Irelia:TopLane()
 end
 

@@ -3,14 +3,14 @@ IncludeFile("Lib\\DamageIndicator.lua")
 
 class "DeepShen"
 
-local ScriptXan = 8.12
-local NameCreat = "Deep"
+local Version = 8.12
+local Author = "Deep"
 
 function OnLoad()
     if myHero.CharName ~= "Shen" then return end
     __PrintTextGame("<b><font color=\"#00FF00\">Champion:</font></b> " ..myHero.CharName.. "<b><font color=\"#cffffff00\"> The Eye Of Twilight!</font></b>")
-    __PrintTextGame("<b><font color=\"#00FF00\">Shen for LOL version</font></b> " ..ScriptXan)
-    __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..NameCreat)
+    __PrintTextGame("<b><font color=\"#00FF00\">Shen for LOL version</font></b> " ..Version)
+    __PrintTextGame("<b><font color=\"#00FF00\">By: </font></b> " ..Author)
     DeepShen:__init()
 end
 
@@ -258,8 +258,8 @@ function DeepShen:OnTick()
     end
 	
     if GetKeyPress(self.LaneClear) > 0 then	
-        self:ClearY()  
-        self:ClearQ()  
+        self:LaneclearQ()  
+        self:Clearjungle()  
     end 
 	
 --	self:TurnoffQ()
@@ -447,7 +447,7 @@ function DeepShen:ComboShen()
     end 
 end
 
-function DeepShen:ClearY()
+function DeepShen:LaneclearQ()
     for i, minion in pairs(self:EnemyMinionsTbl(500)) do
         if minion ~= 0 then
             if self.Q:IsReady() and self.LQ and GetDistance(Vector(minion)) <= 300 then
@@ -457,7 +457,7 @@ function DeepShen:ClearY()
     end 
 end 
 
-function DeepShen:ClearQ()
+function DeepShen:Clearjungle()
     for i, junged in pairs(self:EnemyJungleTbl(500)) do 
         if junged ~= 0 then
             if self.Q:IsReady() and self.JQ and GetDistance(Vector(junged)) <= 300 then
