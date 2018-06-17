@@ -64,6 +64,72 @@ function Veigar:TopLane()
     ["InfiniteDuress"] = true,
     ["XerathLocusOfPower2"] = true,
 	}
+	
+    self.listSpellDash = {
+    ["MaokaiW"] = true,
+    ["Crowstorm"] = true,
+    ["CamilleE"] = true,
+    ["BlindMonkQTwo"] = true,
+	["BlindMonkWOne"] = true,
+    ["NocturneParanoia2"] = true,
+    ["XinZhaoE"] = true,
+    ["PantheonW"] = true,
+    ["AkaliShadowDance"] = true,
+    ["Headbutt"] = true,
+    ["BraumW"] = true,                       
+    ["DianaTeleport"] = true,
+    ["JaxLeapStrike"] = true,
+    ["MonkeyKingNimbus"] = true,
+    ["PoppyE"] = true,
+    ["IreliaGatotsu"] = true,
+    ["LucianE"] = true,
+    ["EzrealArcaneShift"] = true,
+    ["TristanaW"] = true,
+    ["AhriTumble"] = true,
+	["CarpetBomb"] = true,
+	["FioraQ"] = true,
+	["SummonerFlash"] = true,
+	["CarpetBomb"] = true,
+	["FioraQ"] = true,
+	["KindredQ"] = true,
+	["RiftWalk"] = true,
+	["FizzETwo"] = true,
+	["FizzE"] = true,
+	["CamilleEDash2"] = true,
+	["AatroxQ"] = true,
+	["RakanW"] = true,
+	["QuinnE"] = true,
+	["JarvanIVDemacianStandard"] = true,
+	["ShyvanaTransformLeap"] = true,
+	["ShenE"] = true,
+	["Deceive"] = true,
+	["SejuaniQ"] = true,
+	["KhazixE"] = true,
+	["KhazixELong"] = true,
+	["TryndamereE"] = true,
+	["LeblancW"] = true,
+	["GalioE"] = true,
+	["ZacE"] = true,
+	["ViQ"] = true,
+	["EkkoEAttack"] = true,
+	["TalonQ"] = true,
+	["EkkoE"] = true,
+	["FizzQ"] = true,
+	["GragasE"] = true,
+	["GravesMove"] = true,
+	["OrnnE"] = true,
+	["Pounce"] = true,
+	["RivenFeint"] = true,
+	["KaynQ"] = true,
+	["RenektonSliceAndDice"] = true,
+	["RenektonDice"] = true,
+	["VayneTumble"] = true,
+	["UrgotE"] = true,
+	["JarvanIVDragonStrike"] = true,
+	["WarwickR"] = true,
+	["ZiggsDashWrapper"] = true,
+	["CaitlynEntrapment"] = true,
+	}
 				
 	Callback.Add("Update", function(...) self:OnUpdate(...) end)
   Callback.Add("Tick", function() self:OnTick() end) 
@@ -131,8 +197,8 @@ function Veigar:autoQtoEndDash()
    --Combo [[ Veigar ]]
 --	self.menu_Combo_QendDash = self:MenuBool("Auto E End Dash", false)
    self.CQ = self:MenuBool("Combo Q", true)
-   self.CW = self:MenuBool("Combo W (recommend using Combo Use W in Initialization)", false)
-   self.CWstun = self:MenuBool("Only W CC", true)
+   self.CW = self:MenuBool("Combo W", false)
+   self.CWstun = self:MenuBool("Only W very high chance like CC", true)
    self.CE = self:MenuBool("Combo E", true)
    self.CQhar = self:MenuBool("Harass Q", true)
    self.CWhar = self:MenuBool("Harass W", true)
@@ -140,7 +206,11 @@ function Veigar:autoQtoEndDash()
    
 	--Auto
 	self.Einterrupt = self:MenuBool("Interrupt Spells With E", true)
+	self.Edash = self:MenuBool("Interrupt Dashes With E", false)
+	self.Wdash = self:MenuBool("W to dashing enemies", true)
+    self.menu_dashrange = self:MenuSliderInt("Spell dash detection range", 900)
     self.AutoLevel = self:MenuBool("Auto Level", true)
+	
 	
    --Clear [[ Veigar ]]
    
@@ -179,18 +249,24 @@ if not Menu_Begin(self.menu) then return end
      if Menu_Begin("Combo") then
 --		self.menu_Combo_QendDash = Menu_Bool("Auto E Dasing Enemies", self.menu_Combo_QendDash, self.menu)
        self.CQ = Menu_Bool("Combo Q", self.CQ, self.menu)
-       self.CW = Menu_Bool("Combo W (recommend using Combo Use W in Initialization)", self.CW, self.menu)
-       self.CWstun = Menu_Bool("Only combo W on CCed champions", self.CWstun, self.menu)
+       self.CW = Menu_Bool("Combo W", self.CW, self.menu)
+       self.CWstun = Menu_Bool("Only Combo W very high chance like CC", self.CWstun, self.menu)
        self.CE = Menu_Bool("Combo E", self.CE, self.menu)
-       self.CQhar = Menu_Bool("Harass Q", self.CQhar, self.menu)
-       self.CWhar = Menu_Bool("Harass W", self.CWhar, self.menu)
-       self.CWharstun = Menu_Bool("Only harrass W on CCed champions", self.CWharstun, self.menu)
 		self.AutoLevel = Menu_Bool("Auto Level", self.AutoLevel, self.menu)
        Menu_End()
      end
+        if Menu_Begin("Harass") then
+       self.CQhar = Menu_Bool("Harass Q", self.CQhar, self.menu)
+       self.CWhar = Menu_Bool("Harass W", self.CWhar, self.menu)
+       self.CWharstun = Menu_Bool("Only harrass W on CCed champions", self.CWharstun, self.menu)
+        Menu_End()
+       end
 
-        if Menu_Begin("Auto Interrupt") then
-		self.Einterrupt = Menu_Bool("Interrupt Spells With E", self.Einterrupt, self.menu)
+        if Menu_Begin("Auto Casting") then
+		self.Einterrupt = Menu_Bool("Interrupt Dashes With E", self.Einterrupt, self.menu)
+		self.Edash = Menu_Bool("Interrupt Dash With E", self.Edash, self.menu)
+		self.Wdash = Menu_Bool("W to dashing enemies", self.Wdash, self.menu)
+		self.menu_dashrange = Menu_SliderInt("Dash spells detection range", self.menu_dashrange, 500, 1200, self.menu)
         Menu_End()
        end
 
@@ -279,7 +355,7 @@ function Veigar:KillEnemy()
     local RKS = GetTargetSelector(self.R.range)
     Enemy = GetAIHero(RKS)
     if CanCast(_R) and self.KR and RKS ~= 0 and GetDistance(Enemy) < 900 and GetDamage("R", Enemy) > Enemy.HP then
-	 			        CastSpellTarget(Enemy.Addr, _R)
+	 			       DelayAction(function() CastSpellTarget(Enemy.Addr, _R) end, 0.5)
         end
     end 
 
@@ -405,6 +481,18 @@ function Veigar:OnProcessSpell(unit, spell)
    --  __PrintTextGame("Veigar tried to interrupt a skill with E")
 	end
 	end
+    if self.E:IsReady() and self.Edash and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) and GetDistance(unit) < self.menu_dashrange then
+        spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
+        if self.listSpellDash[spell.Name] ~= nil and not unit.IsMe then
+            CastSpellToPos(spell.DestPos_x+220, spell.DestPos_z+220, _E)   
+        end 
+    end
+    if self.W:IsReady() and self.Wdash and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) and GetDistance(unit) < self.menu_dashrange then
+        spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
+        if self.listSpellDash[spell.Name] ~= nil and not unit.IsMe then
+            CastSpellToPos(spell.DestPos_x, spell.DestPos_z, _W)   
+        end 
+    end 
 	end
 	
 function Veigar:EnemyMinionsTbl() --SDK Toir+
