@@ -432,7 +432,8 @@ function DeepSinged:MenuDeep()
 --    self.menu_KeepW = self:MenuBool("Keep W for E+W combo", true)
     self.menu_ComboE = self:MenuBool("Use E", true)
     self.AutoLevel = self:MenuBool("Auto level", true)
---    self.CRlow = self:MenuSliderInt("HP Minimum %", 90)
+    self.CRlow = self:MenuSliderInt("Enemy min % HP for Combo R", 90)
+    self.CRnum = self:MenuSliderInt("Enemies around you to combo R", 2)
 
     self.HarQ = self:MenuBool("Harass Q", true)
     self.HarQdis = self:MenuSliderInt("Harass min Q Distance", 600)
@@ -483,8 +484,8 @@ function DeepSinged:OnDrawMenu()
 --        self.menu_KeepW = Menu_Bool("Keep W for E+W combo", self.menu_KeepW, self.menu)
         self.menu_ComboE = Menu_Bool("Use E", self.menu_ComboE, self.menu)
         self.menu_ComboR = Menu_Bool("Use R", self.menu_ComboR, self.menu)
-  --      self.CRlow = Menu_SliderInt("My min % HP for Combo R", self.CRlow, 0, 100, self.menu)
-        self.AutoLevel = Menu_Bool("Auto Level", self.AutoLevel, self.menu)
+        self.CRlow = Menu_SliderInt("Enemy min % HP to Combo R", self.CRlow, 0, 100, self.menu)
+		self.CRnum = Menu_SliderInt("Enemies around you to combo R", self.CRnum, 1, 5, self.menu)
         Menu_Separator()
         Menu_Text("--Settings [R]--")
         if Menu_Begin("WhileList") then
@@ -495,7 +496,8 @@ function DeepSinged:OnDrawMenu()
         end
         Menu_End()
     end 
-    if (Menu_Begin("Auto Interrupt")) then
+    if (Menu_Begin("Auto")) then
+        self.AutoLevel = Menu_Bool("Auto Level", self.AutoLevel, self.menu)
         self.menu_interruptW = Menu_Bool("Use W on dashing enemies", self.menu_interruptW, self.menu)
         self.menu_interruptE = Menu_Bool("Use E to interrupt channeling spells", self.menu_interruptE, self.menu)
 --		self.menu_Combo_QendDash = Menu_Bool("Auto W Dasing Enemies", self.menu_Combo_QendDash, self.menu)
@@ -640,7 +642,7 @@ end
 
 function DeepSinged:CastR(target)
     if self.R.Whitelist and self.menu_ComboR then
-            if self.R:IsReady() and IsValidTarget(target, 1000) then
+            if self.R:IsReady() and IsValidTarget(target, 1000) and GetPercentHP(target) <= self.CRlow and CountEnemyChampAroundObject(myHero.Addr, 1000) >= self.CRnum then
                 CastSpellTarget(myHero.Addr, _R)
             end 
         end 
