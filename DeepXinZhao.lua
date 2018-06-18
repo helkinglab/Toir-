@@ -293,14 +293,9 @@ function XinZhao:Epos()
     if UseE then Enemy = GetAIHero(UseE) end
     if CanCast(_E) and self.CE and IsValidTarget(Enemy, 700) and GetDistance(Enemy) > self.CEdis then 
         CastSpellTarget(Enemy.Addr, _E)
-    end 
-end
-
-function XinZhao:QposE()
-    local UseQ = GetTargetSelector(1000)
-    if UseQ then Enemy = GetAIHero(UseQ) end
-    if CanCast(_Q) and self.CQfar and IsValidTarget(Enemy, 400) then 
-        CastSpellTarget(myHero.Addr, _Q)
+		if self.CQfar then
+		CastSpellTarget(myHero.Addr, _Q)
+		end
     end 
 end
 
@@ -473,7 +468,6 @@ function XinZhao:OnTick()
 		self:Epos()
 		self:Wcom()
 		self:RComp()
-		self:QposE()
     end
 end 
 
