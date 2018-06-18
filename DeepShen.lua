@@ -170,10 +170,12 @@ end
 function DeepShen:OnAfterAttack(unit, target)
 	if unit.IsMe then
 		if target ~= nil and target.Type == 0 then
-    			CastSpellTarget(target.Addr, self:CheckTiama())
+    			CastSpellTarget(target.Addr, self:CheckTiama1())
+    			CastSpellTarget(target.Addr, self:CheckTiama2())
     		end
     		if GetKeyPress(self.Combo) > 0 then
-    			CastSpellTarget(target.Addr, self:CheckTiama())
+    			CastSpellTarget(target.Addr, self:CheckTiama1())
+    			CastSpellTarget(target.Addr, self:CheckTiama2())
 			    			end
 							
 	for i, minions in ipairs(self:EnemyJungleTbl(500)) do
@@ -182,11 +184,28 @@ function DeepShen:OnAfterAttack(unit, target)
 
 	  if GetKeyPress(self.LaneClear) > 0 then
 		if jungle ~= nil and jungle.Type == 3 and GetDistance(jungle) < 350 then
-			CastSpellTarget(jungle.Addr, self:CheckTiama())
+    			CastSpellTarget(target.Addr, self:CheckTiama1())
+    			CastSpellTarget(target.Addr, self:CheckTiama2())
         end						
 			    	end
 			    end		    						
-			end			
+			end	
+	for i, minions in ipairs(self:EnemyMinionsTbl(500)) do
+        if minions ~= 0 then
+		local jungle = GetUnit(minions)
+	  if GetKeyPress(self.LaneClear) > 0 then
+		if jungle ~= nil and jungle.Type == 1 and GetDistance(jungle) < 350 then
+    			CastSpellTarget(target.Addr, self:CheckTiama2())
+        end
+end		
+		
+	  if GetKeyPress(self.LastHit) > 0 then
+		if jungle ~= nil and jungle.Type == 1 and GetDistance(jungle) < 350 then
+    			CastSpellTarget(target.Addr, self:CheckTiama2())
+        end						
+			    	end
+			    end		    						
+			end		
     	end
 	end
 
@@ -194,10 +213,10 @@ function DeepShen:LastLane()
     local aa = myHero.TotalDmg * 0.7
     for i, minion in pairs(self:EnemyMinionsTbl(500)) do
         if minion ~= 0 then
-            if GetDistance(Vector(minion)) <= 380 
+            if GetDistance(Vector(minion)) <= 360 
 			and aa > minion.HP 
 			then
-			CastSpellTarget(minion.Addr, self:CheckTiama())
+			CastSpellTarget(minion.Addr, self:CheckTiama1())
 --		__PrintTextGame("Jungle HP = " ..minion.HP)
 --  		__PrintTextGame("Tiamat damage = " ..aa)
 --                self:UseTiama()
@@ -206,11 +225,13 @@ function DeepShen:LastLane()
 	end
 end	
 
-function DeepShen:CheckTiama()
+function DeepShen:CheckTiama1()
     if GetSpellIndexByName("ItemTiamatCleave") > -1 then
         return GetSpellIndexByName("ItemTiamatCleave")
     end
+	end
 
+function DeepShen:CheckTiama2()
     if GetSpellIndexByName("ItemTitanicHydraCleave") > -1 then
         return GetSpellIndexByName("ItemTitanicHydraCleave")
     end 

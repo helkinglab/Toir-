@@ -247,7 +247,7 @@ function Irelia:LastLane()
   --  __PrintTextGame("Calling lastlane = ")
     for i ,minion in pairs(self:EnemyMinionsTbl()) do
         if minion ~= 0 then
-		if IsValidTarget(minion.Addr, 380) and (GetAADamageHitEnemy(minion.Addr) * 0.7) > minion.HP then
+		if IsValidTarget(minion.Addr, 360) and (GetAADamageHitEnemy(minion.Addr) * 0.7) > minion.HP then
 				local tiamat = GetSpellIndexByName("ItemTiamatCleave")
 				if (myHero.HasItem(3077) or myHero.HasItem(3074)) and CanCast(tiamat) then
 						CastSpellTarget(myHero.Addr, tiamat)
