@@ -48,6 +48,7 @@ function Tiamat:OnRemoveBuff(unit, buff)
 end
 
 function Tiamat:OnAfterAttack(unit, target)
+	local delaytia = self.TiamatONdelay / 1000
 	if unit.IsMe then
 		if GetKeyPress(self.Harass) > 0 then
 				local tiamat = GetSpellIndexByName("ItemTiamatCleave")
@@ -58,6 +59,22 @@ function Tiamat:OnAfterAttack(unit, target)
 				then
 						CastSpellTarget(myHero.Addr, tiamat)
 				end
+				if (myHero.HasItem(3077) or myHero.HasItem(3074)) 
+				and CanCast(tiamat) 
+				and self.TiamatHarass 
+				and not self.TiamatON
+				then
+						CastSpellTarget(myHero.Addr, tiamat)
+				end
+				if (myHero.HasItem(3077) or myHero.HasItem(3074)) 
+				and CanCast(tiamat) 
+				and self.TiamatHarass
+				and self.TiamatON
+				and self.IsReset
+				then    
+
+					DelayAction(function() CastSpellTarget(myHero.Addr, tiamat) end, delaytia)	
+				end
 				local titanic = GetSpellIndexByName("ItemTitanicHydraCleave")
 				if myHero.HasItem(3748) 
 				and CanCast(titanic) 
@@ -65,6 +82,21 @@ function Tiamat:OnAfterAttack(unit, target)
 				and not self.IsReset
 				then
 							CastSpellTarget(myHero.Addr, titanic)
+				end
+				if myHero.HasItem(3748) 
+				and CanCast(titanic) 
+				and self.TitanicHarass 
+				and not self.TiamatON
+				then
+							CastSpellTarget(myHero.Addr, titanic)
+				end
+				if myHero.HasItem(3748) 
+				and CanCast(titanic) 
+				and self.TitanicHarass 
+				and self.TiamatON
+				and self.IsReset
+				then
+					DelayAction(function() CastSpellTarget(myHero.Addr, tiamat) end, delaytia)	
 				end
     		end
     		if GetKeyPress(self.Combo) > 0 then
@@ -74,8 +106,27 @@ function Tiamat:OnAfterAttack(unit, target)
 				and self.TiamatCombo 
 				and not self.IsReset
 				then
+--   __PrintTextGame("casting tiamat1")
 						CastSpellTarget(myHero.Addr, tiamat)
 						
+				end
+				if (myHero.HasItem(3077) or myHero.HasItem(3074)) 
+				and CanCast(tiamat) 
+				and self.TiamatCombo 
+				and not self.TiamatON
+				then
+  -- __PrintTextGame("casting tiamat11")
+						CastSpellTarget(myHero.Addr, tiamat)
+						
+				end
+				if (myHero.HasItem(3077) or myHero.HasItem(3074)) 
+				and CanCast(tiamat) 
+				and self.TiamatCombo
+				and self.TiamatON
+				and self.IsReset
+				then
+ --  __PrintTextGame("casting tiamat2")
+					DelayAction(function() CastSpellTarget(myHero.Addr, tiamat) end, delaytia)	
 				end
 				local titanic = GetSpellIndexByName("ItemTitanicHydraCleave")
 				if myHero.HasItem(3748) 
@@ -84,6 +135,21 @@ function Tiamat:OnAfterAttack(unit, target)
 				and not self.IsReset
 				then
 							CastSpellTarget(myHero.Addr, titanic)
+				end
+				if myHero.HasItem(3748) 
+				and CanCast(titanic) 
+				and self.TitanicCombo
+				and not self.TiamatON
+				then
+							CastSpellTarget(myHero.Addr, titanic)
+				end
+				if myHero.HasItem(3748) 
+				and CanCast(titanic) 
+				and self.TitanicCombo 
+				and self.TiamatON
+				and self.IsReset
+				then
+					DelayAction(function() CastSpellTarget(myHero.Addr, tiamat) end, delaytia)	
 				end
 			end
 							
@@ -193,6 +259,9 @@ end
 
 function Tiamat:TiamatMenus()
     self.menu = "Deep Tiamat/Hydra"
+	self.TiamatON = self:MenuBool("Tiamat waits for reset", true)
+	self.TiamatONdelay = self:MenuSliderInt("Delay for Tiamat Waits", 200)
+	
 	self.TiamatCombo = self:MenuBool("Use Tiamat/Hydra to reset AA combo", true)
 	self.TitanicCombo = self:MenuBool("Use Titanic to reset AA combo", true)
 	
@@ -213,6 +282,9 @@ end
 
 function Tiamat:OnDrawMenu()
 if not Menu_Begin(self.menu) then return end
+    self.TiamatON = Menu_Bool("Delay Tiamat/Hydra if you have reset abilities", self.TiamatON, self.menu)
+	self.TiamatONdelay = Menu_SliderInt("Delay time in ms", self.TiamatONdelay, 0, 1000, self.menu)
+	Menu_Separator()
     self.TiamatCombo = Menu_Bool("Use Tiamat/Hydra to reset AA in Combo", self.TiamatCombo, self.menu)
     self.TitanicCombo = Menu_Bool("Use Titanic to reset AA in Combo", self.TitanicCombo, self.menu)
 	Menu_Separator()

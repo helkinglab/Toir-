@@ -129,6 +129,7 @@ function XinZhao:autoQtoEndDash()
    self.menu = "Deep XinZhao"
    --Combo [[ XinZhao ]]
    self.CQ = self:MenuBool("Combo Q", true)
+   self.CQfar = self:MenuBool("Q before E", true)
    self.CW = self:MenuBool("Combo W", true)
    self.CE = self:MenuBool("Combo E", true)
 	self.menu_Combo_QendDash = self:MenuBool("Auto Q End Dash", false)
@@ -174,13 +175,18 @@ if not Menu_Begin(self.menu) then return end
 	
      if Menu_Begin("Combo") then
        self.CQ = Menu_Bool("Combo Q", self.CQ, self.menu)
+       self.CQfar = Menu_Bool("Q before E", self.CQfar, self.menu)
+       Menu_Separator()
        self.CW = Menu_Bool("Combo W", self.CW, self.menu)
        self.CWdis = Menu_SliderInt("Combo W distance", self.CWdis, 100, 900, self.menu)
+       Menu_Separator()
        self.CE = Menu_Bool("Combo E", self.CE, self.menu)
 		self.menu_Combo_QendDash = Menu_Bool("Auto E Dasing Enemies", self.menu_Combo_QendDash, self.menu)
        self.CEdis = Menu_SliderInt("Combo minimum E Distance", self.CEdis, 0, 500, self.menu)
+       Menu_Separator()
        self.CWhar = Menu_Bool("Harass W", self.CWhar, self.menu)
        self.CWHarassdis = Menu_SliderInt("Harass W distance", self.CWHarassdis, 100, 900, self.menu)
+       Menu_Separator()
        self.CR = Menu_Bool("Combo R", self.CR, self.menu)
        self.URS = Menu_SliderInt("Your min HP to combo R", self.URS, 0, 100, self.menu)
        self.AR = Menu_Bool("Auto R on low HP", self.AR, self.menu)
@@ -196,8 +202,10 @@ if not Menu_Begin(self.menu) then return end
      if Menu_Begin("Clear skills") then
 			self.JQ = Menu_Bool("Jungle Q", self.JQ, self.menu)
             self.JQMana = Menu_SliderInt("Min MP % for using Jungle Q", self.JQMana, 0, 100, self.menu)
+       Menu_Separator()
 			self.JW = Menu_Bool("Jungle W", self.JW, self.menu)
             self.JWMana = Menu_SliderInt("Min MP % for using Jungle W", self.JWMana, 0, 100, self.menu)
+       Menu_Separator()
 			self.JE = Menu_Bool("Jungle E", self.JE, self.menu)
             self.JEMana = Menu_SliderInt("Min MP % for using Jungle E", self.JEMana, 0, 100, self.menu)
        Menu_End()
@@ -285,6 +293,14 @@ function XinZhao:Epos()
     if UseE then Enemy = GetAIHero(UseE) end
     if CanCast(_E) and self.CE and IsValidTarget(Enemy, 700) and GetDistance(Enemy) > self.CEdis then 
         CastSpellTarget(Enemy.Addr, _E)
+    end 
+end
+
+function XinZhao:QposE()
+    local UseQ = GetTargetSelector(1000)
+    if UseQ then Enemy = GetAIHero(UseQ) end
+    if CanCast(_Q) and self.CQfar and IsValidTarget(Enemy, 400) then 
+        CastSpellTarget(myHero.Addr, _Q)
     end 
 end
 
@@ -457,6 +473,7 @@ function XinZhao:OnTick()
 		self:Epos()
 		self:Wcom()
 		self:RComp()
+		self:QposE()
     end
 end 
 
