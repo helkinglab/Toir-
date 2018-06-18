@@ -214,8 +214,8 @@ if not Menu_Begin(self.menu) then return end
         if Menu_Begin("Last Hit") then
 			self.LHQ = Menu_Bool("Last hit with Q", self.LHQ, self.menu)
             self.LHQMana = Menu_SliderInt("Min MP % for using Last Hit Q", self.LHQMana, 0, 100, self.menu)
-			self.LHE = Menu_Bool("Last hit with E", self.LHQ, self.menu)
-            self.LHEMana = Menu_SliderInt("Min MP % for using Last Hit E", self.LHQMana, 0, 100, self.menu)
+			self.LHE = Menu_Bool("Last hit with E", self.LHE, self.menu)
+            self.LHEMana = Menu_SliderInt("Min MP % for using Last Hit E", self.LHEMana, 0, 100, self.menu)
 			Menu_End()
         end
         if Menu_Begin("Draws") then
