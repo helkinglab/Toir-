@@ -30,8 +30,8 @@ function Irelia:TopLane()
 	self.IreliaE1 = false
     self.IreliaE2 = false
 	
-	self.isQactive = false;
-	self.qtime = 0	
+--	self.isQactive = false;
+--	self.qtime = 0	
 	
     self:IreliaMenus()
 	
@@ -166,8 +166,8 @@ function Irelia:TopLane()
     Callback.Add("Tick", function() self:OnTick() end) 
     Callback.Add("Draw", function(...) self:OnDraw(...) end)
     Callback.Add("DrawMenu", function(...) self:OnDrawMenu(...) end)
-    Callback.Add("UpdateBuff", function(unit, buff, stacks) self:OnUpdateBuff(source, unit, buff, stacks) end)
-	Callback.Add("RemoveBuff", function(unit, buff) self:OnRemoveBuff(unit, buff) end)
+--    Callback.Add("UpdateBuff", function(unit, buff, stacks) self:OnUpdateBuff(source, unit, buff, stacks) end)
+--	Callback.Add("RemoveBuff", function(unit, buff) self:OnRemoveBuff(unit, buff) end)
     Callback.Add("ProcessSpell", function(...) self:OnProcessSpell(...) end)
     Callback.Add("AfterAttack", function(...) self:OnAfterAttack(...) end)
 	
@@ -718,6 +718,7 @@ end
 end
 end
 
+--[[
 --Check W Casting
 function Irelia:OnUpdateBuff(source,unit,buff,stacks)
       if buff.Name == "ireliawdefense" and unit.IsMe then
@@ -726,12 +727,13 @@ function Irelia:OnUpdateBuff(source,unit,buff,stacks)
 		end
 	end
 
-function Irelia:OnRemoveBuff(Object, buff)
+function Irelia:OnRemoveBuff(unit, buff)
       if buff.Name == "ireliawdefense" and unit.IsMe then
             self.isQactive = false
             self.qtime = 0
 		end
 end
+]]
 
 --Check if target has buff E
 function Irelia:IsMarked(target)
