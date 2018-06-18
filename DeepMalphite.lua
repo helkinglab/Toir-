@@ -10,7 +10,7 @@ function OnLoad()
     if myHero.CharName ~= "Malphite" then return end
     __PrintTextGame("<b><font color=\"#00FF00\">Champion:</font></b> " ..myHero.CharName.. "<b><font color=\"#cffffff00\"> Shard Of The Monolith!</font></b>")
     __PrintTextGame("<b><font color=\"#00FF00\">Malphite for LOL version</font></b> " ..Version)
-    __PrintTextGame("<b><font color=\"#00FF00\">Author: </font></b> " ..Author)
+    __PrintTextGame("<b><font color=\"#00FF00\">Creator: </font></b> " ..Author)
     DeepMalphite:__init()
 end
 
@@ -115,9 +115,59 @@ function DeepMalphite:__init()
 --    AddEvent(Enum.Event.OnRemoveBuff, function(...) self:OnRemoveBuff(...) end)
     AddEvent(Enum.Event.OnDrawMenu, function(...) self:OnDrawMenu(...) end)
     AddEvent(Enum.Event.OnDraw, function(...) self:OnDraw(...) end)
---    AddEvent(Enum.Event.OnAfterAttack, function(...) self:OnAfterAttack(...) end)
+    AddEvent(Enum.Event.OnAfterAttack, function(...) self:OnAfterAttack(...) end)
 
     __PrintTextGame("<b><font color=\"#cffffff00\">Deep Malphite</font></b> <font color=\"#ffffff\">Loaded Successfully</font>")
+end
+
+function DeepMalphite:OnAfterAttack(unit, target)
+	if unit.IsMe then
+		if target ~= nil and target.Type == 0 then
+    			CastSpellTarget(target.Addr, self:CheckTiama())
+    		end
+    		if GetKeyPress(self.Combo) > 0 then
+    			CastSpellTarget(target.Addr, self:CheckTiama())
+			    			end
+							
+	for i, minions in ipairs(self:EnemyJungleTbl(500)) do
+        if minions ~= 0 then
+		local jungle = GetUnit(minions)
+
+	  if GetKeyPress(self.LaneClear) > 0 then
+		if jungle ~= nil and jungle.Type == 3 and GetDistance(jungle) < 350 then
+			CastSpellTarget(jungle.Addr, self:CheckTiama())
+        end						
+			    	end
+			    end		    						
+			end			
+    	end
+	end
+
+function DeepMalphite:LastTia()
+    local aa = myHero.TotalDmg * 0.7
+    for i, minion in pairs(self:EnemyMinionsTbl(500)) do
+        if minion ~= 0 then
+            if GetDistance(Vector(minion)) <= 380 
+			and aa > minion.HP 
+			then
+			CastSpellTarget(minion.Addr, self:CheckTiama())
+--		__PrintTextGame("Jungle HP = " ..minion.HP)
+--  		__PrintTextGame("Tiamat damage = " ..aa)
+--                self:UseTiama()
+            end
+		end
+	end
+end	
+
+function DeepMalphite:CheckTiama()
+    if GetSpellIndexByName("ItemTiamatCleave") > -1 then
+        return GetSpellIndexByName("ItemTiamatCleave")
+    end
+
+    if GetSpellIndexByName("ItemTitanicHydraCleave") > -1 then
+        return GetSpellIndexByName("ItemTitanicHydraCleave")
+    end 
+    return -1
 end
    
 function DeepMalphite:Fleemouse()
@@ -164,6 +214,14 @@ function DeepMalphite:LastLane()
 			then
                 CastSpellTarget(minion.Addr, _Q)
             end
+			if self.E:IsReady() 
+			and self.LhitE 
+			and GetPercentMP(myHero) >= self.LhitEMana 
+			and GetDistance(Vector(minion)) <= 380 
+			and self.E:GetDamage(minion) > minion.HP 
+			then
+                CastSpellTarget(myHero.Addr, _E)
+            end
 		end
 	end
 end
@@ -182,7 +240,7 @@ function DeepMalphite:Clearlane()
             if self.W:IsReady() 
 			and self.LW 
 			and GetPercentMP(myHero) >= self.LWMana 
-			and GetDistance(Vector(minion)) <= 300 
+			and GetDistance(Vector(minion)) <= 350 
 			then
                 CastSpellTarget(myHero.Addr, _W)
             end
@@ -312,7 +370,7 @@ function DeepMalphite:Clearjungle()
             if self.W:IsReady() 
 			and self.JW 
 			and GetPercentMP(myHero) >= self.JWMana 
-			and GetDistance(Vector(junged)) <= 300 
+			and GetDistance(Vector(junged)) <= 350 
 			then
                 CastSpellTarget(myHero.Addr, _W)
             end
@@ -653,6 +711,8 @@ function DeepMalphite:MenuDeep()
 	--Clear
     self.LhitQ = self:MenuBool("Lane last Q", true)
     self.LhitQMana = self:MenuSliderInt("Mana Lane last Q %", 30)
+    self.LhitE = self:MenuBool("Lane last E", true)
+    self.LhitEMana = self:MenuSliderInt("Mana Lane last E %", 30)
     self.LQ = self:MenuBool("Lane Q", true)
     self.LW = self:MenuBool("Lane W", true)
     self.LE = self:MenuBool("Lane E", true)
@@ -762,6 +822,9 @@ function DeepMalphite:OnDrawMenu()
 		self.LhitQ = Menu_Bool("Last hit Q", self.LhitQ, self.menu)
         self.LhitQMana = Menu_SliderInt("Min MP % for using Last hit Q", self.LhitQMana, 0, 100, self.menu)
         Menu_Separator()
+		self.LhitE = Menu_Bool("Last hit E", self.LhitE, self.menu)
+        self.LhitEMana = Menu_SliderInt("Min MP % for using Last hit E", self.LhitEMana, 0, 100, self.menu)
+        Menu_Separator()
 		self.LQ = Menu_Bool("Clear Q", self.LQ, self.menu)
         self.LQMana = Menu_SliderInt("Min MP % for using Clear Q", self.LQMana, 0, 100, self.menu)
         Menu_Separator()
@@ -853,6 +916,7 @@ function DeepMalphite:OnTick()
 	
 	if GetKeyPress(self.LastHit) > 0 then
         self:LastLane()
+        self:LastTia()
     end 
 	
 	if GetKeyPress(self.Combo) > 0 then
@@ -868,6 +932,7 @@ function DeepMalphite:OnTick()
         self:Clearlane()  
         self:Clearjungle()  
         self:JungleR() 
+        self:LastTia()
     end 
 	
     self:KillEnemy()
@@ -939,6 +1004,10 @@ function DeepMalphite:ComboDamage(target) -- Ty Nechrito <3 THAKS <3
     local aa = myHero.TotalDmg
   
     local dmg = aa
+	
+    if self:CheckTiama() > -1 then
+        dmg = dmg + aa * 0.7
+    end
 
     if self:GetIgniteIndex() > -1 and CanCast(self:GetIgniteIndex()) then
         dmg = dmg + 50 + 20 * GetLevel(myHero.Addr) / 5 * 3
