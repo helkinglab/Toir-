@@ -104,7 +104,7 @@ function DeepMalphite:__init()
     self.Q = Spell({Slot = 0, Range = 625})
     self.W = Spell({Slot = 1, Range = 225})
     self.E = Spell({Slot = 2, Range = 200})
-    self.R = Spell({Slot = 3, SpellType = Enum.SpellType.SkillShot, Range = 1000, SkillShotType = Enum.SkillShotType.Circle, Collision = false, Width = 300, Delay = 0.1, Speed = 1835 + myHero.MoveSpeed})
+    self.R = Spell({Slot = 3, SpellType = Enum.SpellType.SkillShot, Range = 1150, SkillShotType = Enum.SkillShotType.Circle, Collision = false, Width = 300, Delay = 0.1, Speed = 1835 + myHero.MoveSpeed})
 
     self:MenuDeep()
     
@@ -159,7 +159,7 @@ function DeepMalphite:LastLane()
             if self.Q:IsReady() 
 			and self.LhitQ 
 			and GetPercentMP(myHero) >= self.LhitQMana 
-			and GetDistance(Vector(minion)) <= 650 
+			and GetDistance(Vector(minion)) <= 710 
 			and self.Q:GetDamage(minion) > minion.HP 
 			then
                 CastSpellTarget(minion.Addr, _Q)
@@ -174,7 +174,7 @@ function DeepMalphite:Clearlane()
             if self.Q:IsReady() 
 			and self.LQ 
 			and GetPercentMP(myHero) >= self.LQMana 
-			and GetDistance(Vector(minion)) <= 650 
+			and GetDistance(Vector(minion)) <= 710 
 			and self.Q:GetDamage(minion) > minion.HP 
 			then
                 CastSpellTarget(minion.Addr, _Q)
@@ -189,7 +189,7 @@ function DeepMalphite:Clearlane()
             if self.E:IsReady() 
 			and self.LE 
 			and GetPercentMP(myHero) >= self.LEMana 
-			and GetDistance(Vector(minion)) <= 300 
+			and GetDistance(Vector(minion)) <= 380 
 			and self.E:GetDamage(minion) > minion.HP 
 			then
                 CastSpellTarget(myHero.Addr, _E)
@@ -198,19 +198,113 @@ function DeepMalphite:Clearlane()
     end 
 end 
 
+--    __PrintTextGame("R Jungle Damage = " ..self.R:GetDamage(junged))
+function DeepMalphite:JungleR()
+    for i, junged in pairs(self:EnemyJungleTbl(1200)) do 
+        if junged ~= 0 then
+            if self.R:IsReady() 
+			and self.JRBaron
+			and GetDistance(Vector(junged)) <= 1150
+			and self.R:GetDamage(junged) > junged.HP
+			and junged.Name:lower():find("aron")
+			then
+               CastSpellTarget(junged.Addr, _R)
+            end
+			if self.R:IsReady() 
+			and self.JRDragon
+			and GetDistance(Vector(junged)) <= 1150
+			and self.R:GetDamage(junged) > junged.HP
+			and junged.Name:lower():find("ragon")
+			then
+               CastSpellTarget(junged.Addr, _R)
+            end
+			if self.R:IsReady() 
+			and self.JRHerald
+			and GetDistance(Vector(junged)) <= 1150
+			and self.R:GetDamage(junged) > junged.HP
+			and junged.Name:lower():find("erald")
+			then
+               CastSpellTarget(junged.Addr, _R)
+            end
+			if self.R:IsReady() 
+			and self.JRBlue
+			and GetDistance(Vector(junged)) <= 1150
+			and self.R:GetDamage(junged) > junged.HP
+			and junged.Name:lower():find("lue")
+			then
+               CastSpellTarget(junged.Addr, _R)
+            end
+			if self.R:IsReady() 
+			and self.JRRed
+			and GetDistance(Vector(junged)) <= 1150
+			and self.R:GetDamage(junged) > junged.HP
+			and junged.Name:lower():find("ed")
+			then
+               CastSpellTarget(junged.Addr, _R)
+            end
+            if self.R:IsReady() 
+			and self.JRBaron
+			and self.JRkill
+			and GetDistance(Vector(junged)) <= 1150
+			and self:ComboDamage(junged) > junged.HP
+			and junged.Name:lower():find("aron")
+			then
+               CastSpellTarget(junged.Addr, _R)
+            end
+			if self.R:IsReady() 
+			and self.JRDragon
+			and self.JRkill
+			and GetDistance(Vector(junged)) <= 1150
+			and self:ComboDamage(junged) > junged.HP
+			and junged.Name:lower():find("ragon")
+			then
+               CastSpellTarget(junged.Addr, _R)
+            end
+			if self.R:IsReady() 
+			and self.JRHerald
+			and self.JRkill
+			and GetDistance(Vector(junged)) <= 1150
+			and self:ComboDamage(junged) > junged.HP
+			and junged.Name:lower():find("erald")
+			then
+               CastSpellTarget(junged.Addr, _R)
+            end
+			if self.R:IsReady() 
+			and self.JRBlue
+			and self.JRkill
+			and GetDistance(Vector(junged)) <= 1150
+			and self:ComboDamage(junged) > junged.HP
+			and junged.Name:lower():find("lue")
+			then
+               CastSpellTarget(junged.Addr, _R)
+            end
+			if self.R:IsReady() 
+			and self.JRRed
+			and self.JRkill
+			and GetDistance(Vector(junged)) <= 1150
+			and self:ComboDamage(junged) > junged.HP
+			and junged.Name:lower():find("ed")
+			then
+               CastSpellTarget(junged.Addr, _R)
+            end
+		end
+	end
+end
+			
 function DeepMalphite:Clearjungle()
     for i, junged in pairs(self:EnemyJungleTbl(500)) do 
         if junged ~= 0 then
             if self.Q:IsReady() 
-			and not self.JQKeep 
+			and not self.JQKeep
+			and self.JQ
 			and GetPercentMP(myHero) >= self.JQMana 
-			and GetDistance(Vector(junged)) <= 650 
+			and GetDistance(Vector(junged)) <= 710 
 			then
                 CastSpellTarget(junged.Addr, _Q)
             end
             if self.Q:IsReady() 
 			and self.JQKeep 
-			and GetDistance(Vector(junged)) <= 650 
+			and GetDistance(Vector(junged)) <= 710 
 			and self.Q:GetDamage(junged) > junged.HP 
 			then
                 CastSpellTarget(junged.Addr, _Q)
@@ -224,14 +318,15 @@ function DeepMalphite:Clearjungle()
             end
             if self.E:IsReady() 
 			and not self.JEKeep 
+			and self.JE
 			and GetPercentMP(myHero) >= self.JEMana 
-			and GetDistance(Vector(junged)) <= 200 
+			and GetDistance(Vector(junged)) <= 360
 			then
                 CastSpellTarget(myHero.Addr, _E)
             end
             if self.E:IsReady() 
 			and self.JEKeep 
-			and GetDistance(Vector(junged)) <= 300 
+			and GetDistance(Vector(junged)) <= 420 
 			and self.E:GetDamage(junged) > junged.HP 
 			then
                 CastSpellTarget(myHero.Addr, _E)
@@ -262,7 +357,7 @@ function DeepMalphite:OnProcessSpell(unit, spell)
 	and unit.IsEnemy
 	and not unit.IsDead
 	and IsChampion(unit.Addr)
-	and GetDistance(unit) <= 1000
+	and GetDistance(unit) <= 1100
 	then
         spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
         if self.listSpellInterrup[spell.Name] ~= nil and not unit.IsMe then
@@ -290,30 +385,130 @@ end
 function DeepMalphite:OnDraw()
     local pos = Vector(myHero)
 
-    if self.DrawERange then
-        DrawCircleGame(pos.x, pos.y, pos.z, 600, Lua_ARGB(255, 0, 204, 255))
+    if self.DQ then
+        DrawCircleGame(pos.x, pos.y, pos.z, 710, Lua_ARGB(255,255,0,0))
+    end
+
+    if self.DE then
+        DrawCircleGame(pos.x, pos.y, pos.z, 460, Lua_ARGB(255,0,0,255))
     end 
 
+    if self.DR then
+        DrawCircleGame(pos.x, pos.y, pos.z, 1150, Lua_ARGB(255, 0, 204, 255))
+    end 	
+
     if self.DrawDamage then
-        local selected = GetTargetSelected()
-        local target = GetUnit(selected)
-        if target == 0 then
-            target = GetTarget(range)
-        end
-        if not target then return end
+    for k, v in pairs(self:GetEnemies(1600)) do
+        if v ~= 0 then
+            local target = GetAIHero(v)
         local dmg = self:ComboDamage(target)
         DamageIndicator:DrawDamage(target, dmg, Lua_ARGB(255, 255, 255, 255))
     end 
 end 
+end
+    if self.DrawFullDamage then
+    for i, junged in pairs(self:EnemyJungleTbl(1600)) do 
+        if junged ~= 0 then
+			if self.JRBaron 
+			and junged.Name:lower():find("aron")
+			then
+            local target = (junged)
+			local dmg = self:ComboDamage(target)
+			DamageIndicator:DrawDamage(target, dmg, Lua_ARGB(255, 255, 255, 255))
+			end
+			
+			if self.JRDragon 
+			and junged.Name:lower():find("ragon")
+			then
+            local target = (junged)
+			local dmg = self:ComboDamage(target)
+			DamageIndicator:DrawDamage(target, dmg, Lua_ARGB(255, 255, 255, 255))
+			end 
+			
+			if self.JRHerald 
+			and junged.Name:lower():find("erald")
+			then
+            local target = (junged)
+			local dmg = self:ComboDamage(target)
+			DamageIndicator:DrawDamage(target, dmg, Lua_ARGB(255, 255, 255, 255))
+			end 
+			
+			if self.JRBlue 
+			and junged.Name:lower():find("lue")
+			then
+            local target = (junged)
+			local dmg = self:ComboDamage(target)
+			DamageIndicator:DrawDamage(target, dmg, Lua_ARGB(255, 255, 255, 255))
+			end
+			
+			if self.JRRed 
+			and junged.Name:lower():find("ed")
+			then
+            local target = (junged)
+			local dmg = self:ComboDamage(target)
+			DamageIndicator:DrawDamage(target, dmg, Lua_ARGB(255, 255, 255, 255))
+			end
+	
+end 
+end
+end
+
+    if self.DrawRDamage then
+    for i, junged in pairs(self:EnemyJungleTbl(1600)) do 
+        if junged ~= 0 then
+			if self.JRBaron 
+			and junged.Name:lower():find("aron")
+			then
+            local target = (junged)
+			local dmg = self.R:GetDamage(target)
+			DamageIndicator:DrawDamage(target, dmg, Lua_ARGB(255, 255, 255, 255))
+			end
+			
+			if self.JRDragon 
+			and junged.Name:lower():find("ragon")
+			then
+            local target = (junged)
+			local dmg = self.R:GetDamage(target)
+			DamageIndicator:DrawDamage(target, dmg, Lua_ARGB(255, 255, 255, 255))
+			end 
+			
+			if self.JRHerald 
+			and junged.Name:lower():find("erald")
+			then
+            local target = (junged)
+			local dmg = self.R:GetDamage(target)
+			DamageIndicator:DrawDamage(target, dmg, Lua_ARGB(255, 255, 255, 255))
+			end 
+			
+			if self.JRBlue 
+			and junged.Name:lower():find("lue")
+			then
+            local target = (junged)
+			local dmg = self.R:GetDamage(target)
+			DamageIndicator:DrawDamage(target, dmg, Lua_ARGB(255, 255, 255, 255))
+			end
+			
+			if self.JRRed 
+			and junged.Name:lower():find("ed")
+			then
+            local target = (junged)
+			local dmg = self.R:GetDamage(target)
+			DamageIndicator:DrawDamage(target, dmg, Lua_ARGB(255, 255, 255, 255))
+			end
+	
+end 
+end
+end
+end
 
 function DeepMalphite:CastQ(target)
-    if self.CQ and GetDistance(Vector(target), Vector(myHero)) <= 650 then
+    if self.CQ and GetDistance(Vector(target), Vector(myHero)) <= 710 then
 		CastSpellTarget(target.Addr, _Q)
     end 
 end 
 
 function DeepMalphite:CastQHarass(target)
-    if GetDistance(Vector(target), Vector(myHero)) <= 650 then
+    if GetDistance(Vector(target), Vector(myHero)) <= 710 then
 		CastSpellTarget(target.Addr, _Q)
     end 
 end 
@@ -331,13 +526,13 @@ function DeepMalphite:CastWHarass(target)
     end 
 
 function DeepMalphite:CastE(target)
-    if self.CE and GetDistance(Vector(target), Vector(myHero)) <= 300 then
+    if self.CE and GetDistance(Vector(target), Vector(myHero)) <= 320 then
 		CastSpellTarget(myHero.Addr, _E)
     end 
 end 
 
 function DeepMalphite:CastEHarass(target)
-    if GetDistance(Vector(target), Vector(myHero)) <= 300 then
+    if GetDistance(Vector(target), Vector(myHero)) <= 320 then
 		CastSpellTarget(myHero.Addr, _E)
     end 
 end
@@ -345,7 +540,7 @@ end
 function DeepMalphite:CastR(target)
     if self.CR 
 	and self.R:IsReady() 
-	and IsValidTarget(target, 1000) 
+	and IsValidTarget(target, 1150) 
 	and GetPercentHP(target) <= self.CRlow
 	and CountEnemyChampAroundObject(target.Addr, 320) >= (self.CRnum - 1)
 	then
@@ -360,7 +555,7 @@ function DeepMalphite:CastRkill(target)
 	if self.KR 
 	and self:ComboDamage(target) > GetRealHP(target, 1) 
 	and self.R:IsReady() 
-	and IsValidTarget(target, 1000) 
+	and IsValidTarget(target, 1150) 
 	then
 		local CastPosition, HitChance, Position = self:GetRCirclePreCore(target)
 		if HitChance >= 6 then
@@ -416,16 +611,23 @@ function DeepMalphite:EnemyJungleTbl(range)
     for i, obj in pairs(pUnit) do
         if obj ~= 0  then
             local minions = GetUnit(obj)
-            if not IsEnemy(minions.Addr) and not IsDead(minions.Addr) and not IsInFog(minions.Addr) and GetType(minions.Addr) == 3 then
-			if (GetObjName(minions.Addr) ~= "PlantSatchel" and GetObjName(minions.Addr) ~= "PlantHealth" and GetObjName(minions.Addr) ~= "PlantVision") then
+            if not IsEnemy(minions.Addr) 
+			and not IsDead(minions.Addr) 
+			and not IsInFog(minions.Addr) 
+			and not minions.Name:lower():find("plant")
+			and GetType(minions.Addr) == 3 
+			then
+--[[			if (GetObjName(minions.Addr) ~= "PlantSatchel" 
+			and GetObjName(minions.Addr) ~= "PlantHealth" 
+			and GetObjName(minions.Addr) ~= "PlantVision") 
+			then]]
                 table.insert(result, minions)
-				end
+				
             end
         end
     end
     return result
 end
-
 	 
 function DeepMalphite:MenuDeep()
     self.menu = "Deep Malphite"
@@ -465,6 +667,14 @@ function DeepMalphite:MenuDeep()
     self.JQMana = self:MenuSliderInt("Mana Jungle Q %", 30)
     self.JWMana = self:MenuSliderInt("Mana Jungle W %", 30)
     self.JEMana = self:MenuSliderInt("Mana Jungle E %", 30)
+	
+	--Jungle KS
+    self.JRBaron = self:MenuBool("KS JUNGLE Baron R", true)
+    self.JRDragon = self:MenuBool("KS JUNGLE Dragon R", true)
+    self.JRHerald = self:MenuBool("KS JUNGLE Rift Herald R", false)
+    self.JRBlue = self:MenuBool("KS JUNGLE Blue R", false)
+    self.JRRed = self:MenuBool("KS JUNGLE Red R", false)
+	self.JRkill = self:MenuBool("KS JUNGLE R", true)
 
     --Auto
     self.AutoLevelTop = self:MenuBool("Auto level", true)
@@ -474,8 +684,11 @@ function DeepMalphite:MenuDeep()
   
 	--Drawing
     self.DrawDamage = self:MenuBool("Draw Damage", true)
-    self.DrawQRange = self:MenuBool("Draw Q Range", true)
-    self.DrawRRange = self:MenuBool("Draw R Range", true)
+    self.DrawRDamage = self:MenuBool("Draw R Damage", true)
+    self.DrawFullDamage = self:MenuBool("Draw Full Jungle Damage", true)
+    self.DQ = self:MenuBool("Draw Q Range", false)
+    self.DE = self:MenuBool("Draw E Range", false)
+    self.DR = self:MenuBool("Draw R Range", true)
 	
 	self.Combo = self:MenuKeyBinding("Combo", 32)
     self.LaneClear = self:MenuKeyBinding("Lane Clear", 86)
@@ -526,6 +739,25 @@ function DeepMalphite:OnDrawMenu()
 		Menu_End()
     end
 	
+    if (Menu_Begin("Hold Clear Button To Kill Jungle With R")) then
+        self.DrawFullDamage = Menu_Bool("Draw Combo Damage on Jungle", self.DrawFullDamage, self.menu)
+        Menu_Separator()
+        self.DrawRDamage = Menu_Bool("Draw R Damage on Jungle", self.DrawRDamage, self.menu)
+        Menu_Separator()
+		self.JRBaron = Menu_Bool("Killsteal Baron with R", self.JRBaron, self.menu)
+        Menu_Separator()
+		self.JRDragon = Menu_Bool("Killsteal Dragons with R", self.JRDragon, self.menu)
+        Menu_Separator()
+		self.JRHerald = Menu_Bool("Killsteal Rift Herald with R", self.JRHerald, self.menu)
+        Menu_Separator()
+		self.JRBlue = Menu_Bool("Killsteal Blue with R", self.JRBlue, self.menu)
+        Menu_Separator()
+		self.JRRed = Menu_Bool("Killsteal Red with R", self.JRRed, self.menu)
+        Menu_Separator()
+		self.JRkill = Menu_Bool("R if Combo can kill jungle", self.JRkill, self.menu)
+		Menu_End()
+    end
+	
     if (Menu_Begin("Clear skills")) then
 		self.LhitQ = Menu_Bool("Last hit Q", self.LhitQ, self.menu)
         self.LhitQMana = Menu_SliderInt("Min MP % for using Last hit Q", self.LhitQMana, 0, 100, self.menu)
@@ -554,8 +786,9 @@ function DeepMalphite:OnDrawMenu()
 	
     if (Menu_Begin("Drawings")) then
         self.DrawDamage = Menu_Bool("Draw Damage", self.DrawDamage, self.menu)
-        self.DrawQRange = Menu_Bool("Draw Q Range", self.DrawQRange, self.menu)
-        self.DrawRRange = Menu_Bool("Draw R Range", self.DrawRRange, self.menu)
+        self.DQ = Menu_Bool("Draw Q Range", self.DQ, self.menu)
+        self.DE = Menu_Bool("Draw E Range", self.DE, self.menu)
+        self.DR = Menu_Bool("Draw R Range", self.DR, self.menu)
         Menu_End()
     end
 	
@@ -571,6 +804,7 @@ function DeepMalphite:OnDrawMenu()
 	
     self.Enable_Mod_Skin = Menu_Bool("Enable Mod Skin", self.Enable_Mod_Skin, self.menu)
     self.Set_Skin = Menu_SliderInt("Set Skin", self.Set_Skin, 0, 20, self.menu)
+        Menu_Separator()
     Menu_End()   
 end
 
@@ -633,6 +867,7 @@ function DeepMalphite:OnTick()
     if GetKeyPress(self.LaneClear) > 0 then	
         self:Clearlane()  
         self:Clearjungle()  
+        self:JungleR() 
     end 
 	
     self:KillEnemy()
@@ -750,7 +985,7 @@ function DeepMalphite:RealDamage(target, damage)
 end
 
 function DeepMalphite:GetRCirclePreCore(target)
-	local castPosX, castPosZ, unitPosX, unitPosZ, hitChance, _aoeTargetsHitCount = GetPredictionCore(target.Addr, 0, self.R.delay, self.R.width, 1000, self.R.speed, myHero.x, myHero.z, false, false, 1, 1, 5, 5, 5, 5)
+	local castPosX, castPosZ, unitPosX, unitPosZ, hitChance, _aoeTargetsHitCount = GetPredictionCore(target.Addr, 0, self.R.delay, self.R.width, 1150, self.R.speed, myHero.x, myHero.z, false, false, 1, 1, 5, 5, 5, 5)
 	if target ~= nil then
 		 CastPosition = Vector(castPosX, target.y, castPosZ)
 		 HitChance = hitChance
