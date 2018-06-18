@@ -169,14 +169,145 @@ function Irelia:TopLane()
     Callback.Add("UpdateBuff", function(unit, buff, stacks) self:OnUpdateBuff(source, unit, buff, stacks) end)
 	Callback.Add("RemoveBuff", function(unit, buff) self:OnRemoveBuff(unit, buff) end)
     Callback.Add("ProcessSpell", function(...) self:OnProcessSpell(...) end)
+    Callback.Add("AfterAttack", function(...) self:OnAfterAttack(...) end)
 	
 	Irelia:aa()
 	
  __PrintTextGame("<b><font color=\"#cffffff00\">Deep Irelia</font></b> <font color=\"#ffffff\">Loaded. Enjoy The Blade Dancer</font>")
  end 
+
+function Irelia:OnAfterAttack(unit, target)
+	if unit.IsMe then
+		if target ~= nil and target.Type == 0 then
+				local tiamat = GetSpellIndexByName("ItemTiamatCleave")
+				if (myHero.HasItem(3077) or myHero.HasItem(3074)) and CanCast(tiamat) then
+						CastSpellTarget(myHero.Addr, tiamat)
+				end
+				local titanic = GetSpellIndexByName("ItemTitanicHydraCleave")
+				if myHero.HasItem(3748) and CanCast(titanic) then
+							CastSpellTarget(myHero.Addr, titanic)
+				end
+    		end
+    		if GetKeyPress(self.Combo) > 0 then
+				local tiamat = GetSpellIndexByName("ItemTiamatCleave")
+				if (myHero.HasItem(3077) or myHero.HasItem(3074)) and CanCast(tiamat) then
+						CastSpellTarget(myHero.Addr, tiamat)
+						
+				end
+				local titanic = GetSpellIndexByName("ItemTitanicHydraCleave")
+				if myHero.HasItem(3748) and CanCast(titanic) then
+							CastSpellTarget(myHero.Addr, titanic)
+				end
+			    			end
+							
+	for i, minions in ipairs(self:JungleClear()) do
+        if minions ~= 0 then
+		local jungle = GetUnit(minions)
+		if jungle.Type == 3 then
+
+	  if GetKeyPress(self.LaneClear) > 0 then
+		if jungle ~= nil and GetDistance(jungle) < 380 then
+				local tiamat = GetSpellIndexByName("ItemTiamatCleave")
+				if (myHero.HasItem(3077) or myHero.HasItem(3074)) and CanCast(tiamat) then
+						CastSpellTarget(myHero.Addr, tiamat)
+						
+				end
+				local titanic = GetSpellIndexByName("ItemTitanicHydraCleave")
+				if myHero.HasItem(3748) and CanCast(titanic) then
+							CastSpellTarget(myHero.Addr, titanic)
+				end
+        end						
+			    		end
+			    	end
+		if jungle.Type == 1 then
+
+	  if GetKeyPress(self.LaneClear) > 0 then
+		if jungle ~= nil and GetDistance(jungle) < 380 then
+				local titanic = GetSpellIndexByName("ItemTitanicHydraCleave")
+				if myHero.HasItem(3748) and CanCast(titanic) then
+							CastSpellTarget(myHero.Addr, titanic)
+				end
+        end						
+			    		end
+	  if GetKeyPress(self.LastHit) > 0 then
+		if jungle ~= nil and GetDistance(jungle) < 380 then
+				local titanic = GetSpellIndexByName("ItemTitanicHydraCleave")
+				if myHero.HasItem(3748) and CanCast(titanic) then
+							CastSpellTarget(myHero.Addr, titanic)
+				end
+        end						
+			    		end			
+			    	end		    								
+				end			
+    		end
+			end
+			end
+			
+function Irelia:LastLane()
+  --  __PrintTextGame("Calling lastlane = ")
+    for i ,minion in pairs(self:EnemyMinionsTbl()) do
+        if minion ~= 0 then
+		if IsValidTarget(minion.Addr, 380) and (GetAADamageHitEnemy(minion.Addr) * 0.7) > minion.HP then
+				local tiamat = GetSpellIndexByName("ItemTiamatCleave")
+				if (myHero.HasItem(3077) or myHero.HasItem(3074)) and CanCast(tiamat) then
+						CastSpellTarget(myHero.Addr, tiamat)
+						
+				end
+        end						
+			    		end
+			    	end		    						
+				end			
+	
+function Irelia:JungleClear()
+    GetAllUnitAroundAnObject(myHero.Addr, 2000)
+    local result = {}
+    for i, minions in pairs(pUnit) do
+        if minions ~= 0 and not IsDead(minion) and not IsInFog(minions) and (GetType(minions) == 3 or GetType(minions) == 1) then
+            table.insert(result, minions)
+        end
+    end
+
+    return result
+end 
+	
+ --[[
+function Irelia:LastTia()
+    local aa = myHero.TotalDmg * 0.7
+    for i, minion in pairs(self:EnemyMinionsTbl()) do
+        if minion ~= 0 then
+            if GetDistance(Vector(minion)) <= 380 
+			and aa > minion.HP 
+			then
+			CastSpellTarget(minion.Addr, self:CheckTiama())
+--		__PrintTextGame("Jungle HP = " ..minion.HP)
+--  		__PrintTextGame("Tiamat damage = " ..aa)
+--                self:UseTiama()
+            end
+		end
+	end
+end	]]
+
+ --[[
+function Irelia:CheckTiama()
+    if GetSpellIndexByName("ItemTiamatCleave") > -1 then
+        return GetSpellIndexByName("ItemTiamatCleave")
+    end
+
+    if GetSpellIndexByName("ItemTitanicHydraCleave") > -1 then
+        return GetSpellIndexByName("ItemTitanicHydraCleave")
+    end 
+    return -1
+end]]
  
 function Irelia:OnProcessSpell(unit, spell)
-    if self.E:IsReady() and self.menu_interruptE and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) and GetDistance(unit) < 980 then
+    if self.E:IsReady() 
+	and self.menu_interruptE 
+	and unit 
+	and spell 
+	and unit.IsEnemy 
+	and IsChampion(unit.Addr) 
+	and GetDistance(unit) < 980 
+	then
         spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
         if self.listSpellInterrup[spell.Name] ~= nil and not unit.IsMe then
             CastSpellToPos(unit.x, unit.z, _E)  
@@ -185,7 +316,14 @@ function Irelia:OnProcessSpell(unit, spell)
 			end, 0.1)
         end 
     end 
-    if self.E:IsReady() and self.menu_interruptE2 and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) and GetDistance(unit) < 980 then
+    if self.E:IsReady() 
+	and self.menu_interruptE2 
+	and unit 
+	and spell 
+	and unit.IsEnemy 
+	and IsChampion(unit.Addr) 
+	and GetDistance(unit) < 980 
+	then
         spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
         if self.listSpellDash[spell.Name] ~= nil and not unit.IsMe then
             CastSpellToPos(spell.DestPos_x, spell.DestPos_z, _E)
@@ -194,13 +332,27 @@ function Irelia:OnProcessSpell(unit, spell)
 			end, 0.1)
         end 
     end 
-    if self.W:IsReady() and self.menu_interruptW and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) and GetDistance(unit) < 800 then
+    if self.W:IsReady() 
+	and self.menu_interruptW 
+	and unit 
+	and spell 
+	and unit.IsEnemy 
+	and IsChampion(unit.Addr) 
+	and GetDistance(unit) < 800 
+	then
         spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
         if self.listSpellDangerous[spell.Name] ~= nil and not unit.IsMe then
             CastSpellToPos(unit.x, unit.z, _W) 
         end 
     end 
-    if self.R:IsReady() and self.menu_interruptR and unit and spell and unit.IsEnemy and IsChampion(unit.Addr) and GetDistance(unit) < 950 then
+    if self.R:IsReady() 
+	and self.menu_interruptR 
+	and unit 
+	and spell 
+	and unit.IsEnemy 
+	and IsChampion(unit.Addr) 
+	and GetDistance(unit) < 950 
+	then
         spell.endPos = {x= spell.DestPos_x, y= spell.DestPos_y, z= spell.DestPos_z}
         if self.listSpellDangerous[spell.Name] ~= nil and not unit.IsMe then
             CastSpellToPos(unit.x, unit.z, _R) 
@@ -256,9 +408,6 @@ function Irelia:OnUpdate()
 	if self.menu_Combo_QendDash then
 		self:autoQtoEndDash()
 	end
-	if self.menu_Combo_EendDash then
-		self:autoEtoEndDash()
-	end
 end 
 
 
@@ -281,13 +430,15 @@ function Irelia:IreliaMenus()
     self.CRlow = self:MenuSliderInt("HP Minimum %", 90)
      self.EMode = self:MenuComboBox("Mode [Q] [ TF ]", 0)
 	 
+	 --Auto
+    self.AutoLevelTop = self:MenuBool("Auto level", true)
     self.menu_interruptE2 = self:MenuBool("Use E on dashing enemies", true)
     self.menu_interruptE = self:MenuBool("Use E to interrupt channeling spells", true)
     self.menu_interruptW = self:MenuBool("Use W to block dangerous spells", true)
     self.menu_interruptR = self:MenuBool("Use R to hinder dangerous spells", false)
 	
 	self.menu_Combo_QendDash = self:MenuBool("Auto Q End Dash", false)
-	self.menu_Combo_EendDash = self:MenuBool("Auto E End Dash", true)
+--	self.menu_Combo_EendDash = self:MenuBool("Auto E End Dash", true)
    
     --Lane
     self.LQ = self:MenuBool("Lane Q", true)
@@ -362,9 +513,14 @@ if not Menu_Begin(self.menu) then return end
 			Menu_End()
         end
         if Menu_Begin("Auto") then
+        self.AutoLevelTop = Menu_Bool("Auto Level", self.AutoLevelTop, self.menu)
+		Menu_Separator()
         self.menu_interruptE2 = Menu_Bool("Use E on dashing enemies", self.menu_interruptW, self.menu)
+		Menu_Separator()
         self.menu_interruptE = Menu_Bool("Use E to interrupt channeling spells", self.menu_interruptE, self.menu)
+		Menu_Separator()
         self.menu_interruptW = Menu_Bool("Use W to tank dangerous spells", self.menu_interruptW, self.menu)
+		Menu_Separator()
         self.menu_interruptR = Menu_Bool("Use R to hinder dangerous spells", self.menu_interruptR, self.menu)
 			Menu_End()
         end
@@ -444,34 +600,6 @@ function Irelia:autoQtoEndDash()
 				end
 			end
 			end	
-	
-function Irelia:autoEtoEndDash()
-	for i, enemy in pairs(GetEnemyHeroes()) do
-		if enemy ~= nil then
-		    target = GetAIHero(enemy)
-		    if IsValidTarget(target.Addr, self.E.range) then
-		    --local QPos, QHitChance = HPred:GetPredict(self.HPred_Q_M, target, myHero)
-			    local TargetDashing, CanHitDashing, DashPosition = self.Predc:IsDashing(target, self.E.delay, self.E.width, self.E.speed, myHero, true)	    	
-			    --if IsValidTarget(target.Addr, self.maxGrab) then
-			    	if target.IsDash then
-					    	CastSpellToPos(DashPosition.x, DashPosition.z, _E)
-		DelayAction(function() 
-		        self.E:Cast(myHero.Addr)
-				end, 0.5)
-						--CastSpellToPos(QPos.x, QPos.z, _Q)
-					--end
-			    --end
-			    --if DashPosition ~= nil then
-			    	--if GetDistance(DashPosition) <= self.Q.range then
-			  		--local Collision = CountObjectCollision(0, target.Addr, myHero.x, myHero.z, DashPosition.x, DashPosition.z, self.Q.width, self.Q.range, 65)
-				  		--local Collision = CountCollision(myHero.x, myHero.z, DashPosition.x, DashPosition.z, self.Q.delay, self.Q.width, self.Q.range, self.Q.speed, 0, 5, 5, 5, 5)
-				  		--if Collision == 0 then
-					    	--CastSpellTarget(target.Addr, _Q)
-					    end
-					end
-				end
-			end
-		end
 	
 function Irelia:EnemyMinionsTbl() --SDK Toir+
     GetAllUnitAroundAnObject(myHero.Addr, 2000)
@@ -923,6 +1051,7 @@ function Irelia:OnTick()
 	
     if GetKeyPress(self.LastHit) > 0 then	
         self:FarmeQ()
+		self:LastLane()
     end
 	
     if GetKeyPress(self.Harass) > 0 then	
@@ -935,6 +1064,7 @@ function Irelia:OnTick()
     if GetKeyPress(self.LaneClear) > 0 then	
         self:LaneFarmeQ()
 		self:JungleIreli()
+		self:LastLane()
     end
 
 	if GetKeyPress(self.Combo) > 0 then
@@ -944,6 +1074,64 @@ function Irelia:OnTick()
         self:CastR()
 		self:CastQFaraway()
     end
+	
+if self.AutoLevelTop then
+    if myHero.Level  == 1 then
+        LevelUpSpell(_Q)
+        end 
+    if myHero.Level  == 2 then
+        LevelUpSpell(_E)
+        end 
+    if myHero.Level  == 3 then
+        LevelUpSpell(_W)
+        end 
+    if myHero.Level  == 4 then
+        LevelUpSpell(_Q)
+        end 
+    if myHero.Level  == 5 then
+        LevelUpSpell(_Q)
+        end 
+    if myHero.Level  == 6 then
+        LevelUpSpell(_R)
+        end 
+    if myHero.Level  == 7 then
+        LevelUpSpell(_Q)
+        end 
+    if myHero.Level  == 8 then
+        LevelUpSpell(_E)
+        end 
+    if myHero.Level  == 9 then
+        LevelUpSpell(_Q)
+        end 
+    if myHero.Level  == 10 then
+        LevelUpSpell(_E)
+        end 
+    if myHero.Level  == 11 then
+        LevelUpSpell(_R)
+        end 
+    if myHero.Level  == 12 then
+        LevelUpSpell(_E)
+        end 
+    if myHero.Level  == 13 then
+        LevelUpSpell(_E)
+        end 
+    if myHero.Level  == 14 then
+        LevelUpSpell(_W)
+        end 
+    if myHero.Level  == 15 then
+        LevelUpSpell(_W)
+        end 
+    if myHero.Level  == 16 then
+        LevelUpSpell(_R)
+        end 
+    if myHero.Level  == 17 then
+        LevelUpSpell(_W)
+        end 
+    if myHero.Level  == 18 then
+        LevelUpSpell(_W)
+        end    
+    end	
+	
 end 
 
 function Irelia:aa()
