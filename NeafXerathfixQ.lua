@@ -1,441 +1,56 @@
---SDK
-IncludeFile("Lib\\TOIR_SDK.lua")
---Check Champion
-Xerath = class()
-function OnLoad()
-if GetChampName(GetMyChamp()) == "Xerath" then
-  __PrintTextGame("<b><font color=\"#2EFEF7\">Neaf Xerath</font></b> <font color=\"#ffffff\">Loaded</font>")
-  Xerath:Req()
-end
-end
+require('math')
 
-function Xerath:Req()
-  pred = VPrediction(true)
-  --HPred = HPrediction()
-  SetLuaCombo(true)
-  SetLuaLaneClear(true)
-
-  self.menu_ts = TargetSelector(1750, 0, myHero, true, true, true)
+local index_table = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
 
+function to_binary(integer)
+    local remaining = tonumber(integer)
+    local bin_bits = ''
 
-  self.Q = Spell(_Q,1500)
-  self.W = Spell(_W,1000)
-  self.E = Spell(_E,1150)
-  self.R = Spell(_R,3200)
+    for i = 7, 0, -1 do
+        local current_power = math.pow(2, i)
 
-  self.Q:SetSkillShot(0.54,math.huge,200,false)
-  self.W:SetSkillShot(0.7,math.huge,275,false)
-  self.E:SetSkillShot(0.2,1400,140,true)
-  self.R:SetSkillShot(0.54,math.huge,190,false)
-
-  self.isQactive = false;
-  self.qtime = 0
-  self.isRactive = false;
-  self.lastQtime = 0
-  self.lastRtime = 0
-  self.extraq = 0
-  self.rstack = 0
-  self.kalanstack = 0
-  self.rkil= {}
-  self.EnemyMinions = minionManager(MINION_ENEMY, 2000, myHero, MINION_SORT_HEALTH_ASC)
-
-  Callback.Add("Tick", function(...) self:OnTick(...) end)
-    Callback.Add("Draw", function(...) self:OnDraw(...) end)
-    Callback.Add("ProcessSpell", function(...) self:OnProcessSpell(...) end)
-    Callback.Add("DrawMenu", function(...) self:OnDrawMenu(...) end)
-    Callback.Add("UpdateBuff", function(unit, buff, stacks) self:OnUpdateBuff(source, unit, buff, stacks) end)
-    Callback.Add("Update", function(...) self:OnUpdate(...) end)
-   Callback.Add("RemoveBuff", function(unit, buff) self:OnRemoveBuff(unit, buff) end)
-     self:XerathMenu()
-end
-
-
-function Xerath:XerathMenu()
-  self.menu ="Neaf-Xerath"
-  self.Use_Combo_Q = self:MenuBool("Use Combo Q",true)
-  self.Q_Extra = self:MenuSliderInt("Wait Extra Range For Q",200)
-  self.Use_Combo_W = self:MenuBool("Use Combo W",true)
-  self.Use_Combo_E = self:MenuBool("Use Combo E",true)
-  self.Lane_Q = self:MenuBool("Use LaneClear Q",true)
-  self.Lane_W = self:MenuBool("Use LaneClear W",true)
-  self.Lane_Mana = self:MenuSliderInt("Min Mana Percent For LaneClear",60)
-
-  self.Use_R = self:MenuBool("Use R On Enemies",true)
-  --self.Target_R = self:MenuSliderInt("R Target Select NearMouse = 1 Auto = 2",1)
-  --self.Distance_R = self:MenuSliderInt("NearMouse Max Distance To Target",100)
-  self.Mode_R = self:MenuSliderInt("R Shoot Mode Tapkey = 1 Auto = 2",2)
-  self.RTap = self:MenuKeyBinding("RTap",72)
-  self.RDelay = self:MenuSliderInt("Delay Between R Shoots On Auto Shoot Mode",1)
-
-  self.Draw_All = self:MenuBool("Draws",true)
-  self.Draw_Q = self:MenuBool("Draw Q Range",true)
-  self.Draw_W = self:MenuBool("Draw W Range",true)
-  self.Draw_E = self:MenuBool("Draw E Range",true)
-  self.Draw_R = self:MenuBool("Draw R Range Minimap",true)
-  self.Draw_Killable = self:MenuBool("Draw Killables Text With R",true)
-  self.Draw_KillableLine = self:MenuBool("Draw Killables Line With R",true)
-
-  self.Evade_R = self:MenuBool("Dont Dodge When R Is Active",true)
-  self.AntiGapclose = self:MenuBool("AntiGapclose E",true)
-
-  self.LaneClear = self:MenuKeyBinding("LaneClear",86)
-  self.Combo = self:MenuKeyBinding("Combo",32)
-end
-
-
-function Xerath:OnDrawMenu()
-  if Menu_Begin(self.menu) then
-    if Menu_Begin("Combo Menu") then
-      self.Use_Combo_Q = Menu_Bool("Use Combo Q",self.Use_Combo_Q,self.menu)
-      self.Q_Extra = Menu_SliderInt("Wait Extra Range For Q",self.Q_Extra,0,200,self.menu)
-      self.Use_Combo_W = Menu_Bool("Use Combo W",self.Use_Combo_W,self.menu)
-      self.Use_Combo_E = Menu_Bool("Use Combo E",self.Use_Combo_E,self.menu)
-      Menu_End()
-    end
-
-    if Menu_Begin("LaneClear Menu") then
-      self.Lane_Q = Menu_Bool("Use LaneClear Q",self.Lane_Q,self.menu)
-      self.Lane_W = Menu_Bool("Use LaneClear W",self.Lane_W,self.menu)
-      self.Lane_Mana = Menu_SliderInt("Min Mana Percent For LaneClear",self.Lane_Mana,0,100,self.menu)
-    Menu_End()
-    end
-
-    if Menu_Begin("R Menu") then
-      self.Use_R = Menu_Bool("Use R On Enemies",self.Use_R,self.menu)
-      --self.Target_R = Menu_SliderInt("R Target Select NearMouse = 1 Auto = 2",self.Target_R,1,2,self.menu)
-      --self.Distance_R = Menu_SliderInt("NearMouse Max Distance To Target",self.Distance_R,50,300,self.menu)
-      self.Mode_R = Menu_SliderInt("R Shoot Mode Tapkey = 1 Auto = 2",self.Mode_R,1,2,self.menu)
-      self.RTap = Menu_KeyBinding("RTap",self.RTap,self.menu)
-      self.RDelay = Menu_SliderInt("Delay Between R Shoots On Auto Shoot Mode",self.RDelay,0,3,self.menu)
-    Menu_End()
-    end
-
-    if Menu_Begin("Draw Menu") then
-      self.Draw_All = Menu_Bool("Draws",self.Draw_All,self.menu)
-      self.Draw_Q = Menu_Bool("Draw Q Range",self.Draw_Q,self.menu)
-      self.Draw_W = Menu_Bool("Draw W Range",self.Draw_W,self.menu)
-      self.Draw_E = Menu_Bool("Draw E Range",self.Draw_E,self.menu)
-      self.Draw_R = Menu_Bool("Draw R Range Minimap",self.Draw_R,self.menu)
-      self.Draw_Killable = Menu_Bool("Draw Killables Text With R",self.Draw_Killable,self.menu)
-      self.Draw_KillableLine = Menu_Bool("Draw Killables Line With R",self.Draw_KillableLine,self.menu)
-      Menu_End()
-    end
-   if Menu_Begin("Misc Menu") then
-      self.Evade_R = Menu_Bool("Dont Dodge When R Is Active",self.Evade_R,self.menu)
-      self.AntiGapclose = Menu_Bool("AntiGapclose E",self.AntiGapclose,self.menu)
-      Menu_End()
-      end
-   if Menu_Begin("Key Menu") then
-          self.Combo = Menu_KeyBinding("Combo", self.Combo, self.menu)
-          self.LaneClear = Menu_KeyBinding("LaneClear",self.LaneClear,self.menu)
-          Menu_End()
-          end
-  Menu_End()
-  end
-end
-
-  function Xerath:OnProcessSpell(unit,spell)
-  if unit.IsMe and spell.Name == "XerathLocusPulse" then
-    if self.kalanstack > 0 then
-      self.kalanstack = self.kalanstack - 1
-      end
-      end
-  if not unit.IsMe and self.isRactive and self.Evade_R then
-      SetEvade(true)
-      end
-  end
-
-
-  function Xerath:OnDraw()
-    if self.Draw_All then
-      if self.Draw_Q then
-        DrawCircleGame(myHero.x,myHero.y,myHero.z,self.Q.range,Lua_ARGB(255,255,0,0))
-      end
-      if self.Draw_W then
-        DrawCircleGame(myHero.x,myHero.y,myHero.z,self.W.range,Lua_ARGB(255,0,255,0))
-      end
-      if self.Draw_E then
-        DrawCircleGame(myHero.x,myHero.y,myHero.z,self.E.range,Lua_ARGB(255,0,0,255))
-      end
-      if self.Draw_R then
-        DrawCircleMiniMap(myHero.x,myHero.y,myHero.z,self.R.range)
-        end
-      if self.Draw_Killable then
-        for i,v in pairs(GetEnemyHeroes()) do
-          hero = GetAIHero(v)
-          hp = hero.HP
-          totaldamac = GetDamage("R",hero) * self.rstack
-          yuzde = totaldamac * 100 / hp
-          yuzde = math.floor(yuzde)
-          if self.rkil[hero.NetworkId] == "killable" then
-            if not IsDead(hero.Addr) and not IsInFog(hero.Addr) then
-            DrawTextD3DX(WorldToScreenPos(hero).x - 25, WorldToScreenPos(hero).y - 25, yuzde.."%".." Killable With R", Lua_ARGB(255,25510 ,255,0), 2)
-            end
-            end
-            end
-            end
-     if self.Draw_KillableLine then
-        for i,v in pairs(GetEnemyHeroes()) do
-          hero = GetAIHero(v)
-          if self.rkil[hero.NetworkId] == "killable" and CanCast(_R) then
-            if not IsDead(hero.Addr) and GetDistance(myHero,hero) <= 5000 and not IsInFog(hero.Addr) then
-            DrawLineD3DX(WorldToScreenPos(hero).x, WorldToScreenPos(hero).y,WorldToScreenPos(myHero).x,WorldToScreenPos(myHero).y,5, Lua_ARGB(150,25510 ,255,0))
-            end
-            end
-            end
-            end
-        --local mini_x,mini_y = WorldToMiniMap(myHero.x,myHero.y,myHero.z)
-        --DrawCircleGame(mini_x,mini_y,myHero.z,10,Lua_ARGB(255,255,0,0))
-
-    end
-  end
-
---Check Q And R Casting
-  function Xerath:OnUpdateBuff(source,unit,buff,stacks)
-      if buff.Name == "XerathArcanopulseChargeUp" and unit.IsMe then
-            self.isQactive = true
-            self.qtime = GetTimeGame()
-            SetLuaBasicAttackOnly(true)
-          end
-      if buff.Name == "XerathLocusOfPower2" and unit.IsMe then
-			      self.isRactive = true
-            SetLuaMoveOnly(true)
-            SetLuaBasicAttackOnly(true)
-            self.kalanstack = self.rstack
-       end
-  end
-
-  function Xerath:OnRemoveBuff(unit,buff)
-      if buff.Name == "XerathArcanopulseChargeUp" and unit.IsMe then
-            self.isQactive = false
-            self.qtime = 0
-            SetLuaBasicAttackOnly(false)
-          end
-      if buff.Name == "XerathLocusOfPower2" and unit.IsMe then
-			      self.isRactive = false
-            SetLuaMoveOnly(false)
-            SetLuaBasicAttackOnly(false)
-            self.kalanstack = 0
-     end
-   end
-
-
-  function Xerath:QLogic()
-    local target = GetTargetSelector(1500, 0)
-    if not self.isRactive and target ~= nil and CanCast(_Q) and self.Use_Combo_Q then
-      if not self.isQactive then
-        if self.lastQtime == 0 or GetTimeGame() - self.lastQtime >= 1 and IsValidTarget(target,1500) then
-        self.Q:Cast(target)
-        self.lastQtime = GetTimeGame()
-	return
-      end
-      end
-      
-      if self.isQactive and IsValidTarget(target,1500)  then
-        local rangee = 750 + (GetTimeGame() - self.qtime)*self.extraq
-
-            if rangee > 1500 then
-              rangee = 1500
-              end
-      --self.HPred_Q_M = HPSkillshot({type = "PromptLine", delay = 0.55, range = rangee, width = 200})
-        local tamget = GetTargetSelector(rangee,0)
-      if tamget ~= nil and IsValidTarget(tamget,rangee) then
-        tar = GetAIHero(tamget)
-        local CastPosition, HitChance,Position = pred:GetLineCastPosition(tar,self.Q.delay,self.Q.width,range,self.Q.speed,myHero,false)
-        --local QPos, QHitChance = HPred:GetPredict(self.HPred_Q_M, tar, myHero)
-        if HitChance >= 2 then
-        --self.Q:Cast(target)
-        ReleaseSpellToPos(CastPosition.x,CastPosition.z,_Q)
-        end
-      end
-      end
-    end
-  end
-
-function Xerath:FarmQ()
-  self.EnemyMinions:update()
-  for i ,minion in pairs(self.EnemyMinions.objects) do
-    if not self.isRactive and minion ~= nil and CanCast(_Q) and self.Lane_Q and not IsDead(minion.Addr) and minion.Type == 1 then
-       if not self.isQactive and GetPercentMP(myHero.Addr) >= self.Lane_Mana then
-       if self.lastQtime == 0 or GetTimeGame() - self.lastQtime >= 1 and IsValidTarget(minion,1500) then
-        CastSpellToPos(GetMousePos().x,GetMousePos().z,_Q)
-        self.lastQtime = GetTimeGame()
-       return
-       end
-    end
-     if self.isQactive and IsValidTarget(minion,1500) then
-        local range = 750 + (GetTimeGame() - self.qtime)*self.extraq
-
-            if range > 1500 then
-              range = 1500
-              end
-        if IsValidTarget(minion,range) and not IsDead(minion.Addr) then
-            ReleaseSpellToPos(minion.x,minion.z,_Q)
+        if remaining >= current_power then
+            bin_bits = bin_bits .. '1'
+            remaining = remaining - current_power
+        else
+            bin_bits = bin_bits .. '0'
         end
     end
-    end
-    end
-    end
 
- function Xerath:FarmW()
-  self.EnemyMinions:update()
-  for i ,minion in pairs(self.EnemyMinions.objects) do
-    if not self.isRactive and minion ~= nil and CanCast(_W) and self.Lane_W and IsValidTarget(minion,self.W.range) and GetPercentMP(myHero.Addr) >= self.Lane_Mana and not IsDead(minion.Addr) and minion.Type == 1 then
-    CastSpellToPos(minion.x,minion.z,_W)
-    end
-    end
-    end
-
-
-function Xerath:WLogic()
-  local target = GetTargetSelector(self.W.range, 0)
-  if not self.isQactive and not self.isRactive and target ~= 0 and self.Use_Combo_W and CanCast(_W) then
-    if CanCast(_W) then
-      tar = GetAIHero(target)
-      local CastPosition, HitChance, Position = pred:GetCircularAOECastPosition(tar,self.W.delay,self.W.width,self.W.range,self.W.speed,myHero,false)
-      --local WPos, WHitChance = HPred:GetPredict(self.HPred_W_M, tar, myHero)
-      if HitChance >= 2 then
-      --self.W:Cast(target)
-        CastSpellToPos(CastPosition.x,CastPosition.z,_W)
-      end
-    end
-  end
+    return bin_bits
 end
 
-function Xerath:ELogic()
-  local target = GetTargetSelector(800, 0)
-  if not self.isQactive and not self.isRactive and target ~= 0 and IsValidTarget(target, self.E.range) and self.Use_Combo_E then
-    if CanCast(_E) then
-      tar = GetAIHero(target)
-      local CastPosition, HitChance, Position = pred:GetLineCastPosition(tar,self.E.delay,self.E.width,self.E.range,self.E.speed,myHero,true)
-      --local EPos, EHitChance = HPred:GetPredict(self.HPred_E_M, tar, myHero)
-      if HitChance >= 2 then
-      --self.E:Cast(target)
-        CastSpellToPos(CastPosition.x,CastPosition.z,_E)
-      end
-    end
-  end
+function from_binary(bin_bits)
+    return tonumber(bin_bits, 2)
 end
 
-function Xerath:RLogic()
-  targ = GetTargetSelector(self.R.range, 0)
-  if self.isRactive and targ ~= nil and IsValidTarget(targ, self.R.range) then
-    tar = GetAIHero(targ)
-	local CastPosition, HitChance, Position = pred:GetLineCastPosition(tar,self.R.delay,self.R.width,self.R.range,self. R.speed,myHero,false)
-  --local RPos, RHitChance = HPred:GetPredict(self.HPred_R_M, tar, myHero)
-	if HitChance >= 2 and self.Mode_R == 1 and GetKeyPress(self.RTap) > 0 then
-		CastSpellToPos(CastPosition.x,CastPosition.z,_R)
-    self.lastRtime = GetTimeGame()
-  elseif HitChance >= 2 and self.Mode_R == 2 and GetTimeGame() - self.lastRtime >= self.RDelay then
-    CastSpellToPos(CastPosition.x,CastPosition.z,_R)
-    self.lastRtime = GetTimeGame()
-	end
-end
-end
+function CloudDecode(to_decode)
+    local padded = to_decode:gsub("%s", "")
+    local unpadded = padded:gsub("=", "")
+    local bit_pattern = ''
+    local decoded = ''
 
-function Xerath:LaneClearLogic()
---__PrintTextGame(self.W.range + self.W.width)
-end
-
-function Xerath:GapClose()
-    for i,enm in pairs(GetEnemyHeroes()) do
-        if enm ~= nil and CanCast(_E) then
-            local hero = GetAIHero(enm)
-            local TargetDashing, CanHitDashing, DashPosition = pred:IsDashing(hero, self.E.delay, self.E.width, self.E.speed, myHero, false)
-            if DashPosition ~= nil and GetDistance(DashPosition) <= self.E.range- 200 then
-                CastSpellToPos(DashPosition.x,DashPosition.z,_E)
-            end
+    for i = 1, string.len(unpadded) do
+        local char = string.sub(to_decode, i, i)
+        local offset, _ = string.find(index_table, char)
+        if offset == nil then
+             error("Invalid character '" .. char .. "' found.")
         end
+
+        bit_pattern = bit_pattern .. string.sub(to_binary(offset-1), 3)
     end
+
+    for i = 1, string.len(bit_pattern), 8 do
+        local byte = string.sub(bit_pattern, i, i+7)
+        decoded = decoded .. string.char(from_binary(byte))
+    end
+
+    local padding_length = padded:len()-unpadded:len()
+
+    if (padding_length == 1 or padding_length == 2) then
+        decoded = decoded:sub(1,-2)
+    end
+    return decoded
 end
-                
-
-function Xerath:MenuBool(stringKey, bool)
-    return ReadIniBoolean(self.menu, stringKey, bool)
-end
-
-function Xerath:MenuSliderInt(stringKey, valueDefault)
-    return ReadIniInteger(self.menu, stringKey, valueDefault)
-end
-
-function Xerath:MenuKeyBinding(stringKey, valueDefault)
-    return ReadIniInteger(self.menu, stringKey, valueDefault)
-end
-
-function Xerath:OnUpdate()
-  if isRactive and self.Evade_R then
-    SetEvade(true)
-    end
-    end
-
-
-function Xerath:OnTick()
-  if IsDead(myHero.Addr) or IsTyping() or IsDodging() then return end
-  self:RLogic()
-
-  if self.AntiGapclose then
-  self:GapClose()
-  end
-
-  --self.HPred_Q_M = HPSkillshot({type = "PromptLine", delay = 0.55, range = 750, width = 200})
-	--self.HPred_W_M = HPSkillshot({type = "PromptCircle", delay = 0.8, range = 1000, radius = 275})
-  --self.HPred_E_M = HPSkillshot({type = "DelayLine", delay = 0.25, range = 1125, speed = 1400, collisionM = true, collisionH = true, width = 140})
-	
-
-  if GetKeyPress(self.Combo) > 0 then
-      self:QLogic()
-      self:WLogic()
-      self:ELogic()
-   end
-  if GetKeyPress(self.LaneClear) > 0 then
-      self:FarmQ()
-      self:FarmW()
-   end
-    if GetSpellLevel(GetMyChamp(),_R) >= 1 then
-    self.R.range = 1200 * GetSpellLevel(GetMyChamp(),_R) + 2000
-    end
-    --self.HPred_R_M = HPSkillshot({type = "PromptCircle", delay = 0.25,range = self.R.range, radius = 190})
-   self.extraq = 500 - self.Q_Extra
-
-   if GetSpellLevel(GetMyChamp(),_R) == 1 then
-      self.rstack = 3
-   elseif GetSpellLevel(GetMyChamp(),_R) == 2 then
-      self.rstack = 4
-   elseif GetSpellLevel(GetMyChamp(),_R) == 3 then
-      self.rstack = 5
-    else
-      self.rstack = 0
-    end
-
-    for i,v in pairs(GetEnemyHeroes()) do
-        hero = GetAIHero(v)
-      if self.isRactive then
-          totaldamac = GetDamage("R",hero) * self.kalanstack
-          if hero.HP < totaldamac then
-        if not IsDead(hero.Addr) then
-        --chamname =  GetChampName(v)
-          self.rkil[hero.NetworkId] = "killable"
-        end
-      else
-          self.rkil[hero.NetworkId] = "unkillable"
-
-      end  
-      elseif not self.isRactive then
-          totaldamac = GetDamage("R",hero) * self.rstack
-          if hero.HP < totaldamac then
-        if not IsDead(hero.Addr) then
-        --chamname =  GetChampName(v)
-          self.rkil[hero.NetworkId] = "killable"
-        end
-      else
-          self.rkil[hero.NetworkId] = "unkillable"
-
-      end  
-      end
-
-      if self.isRactive and self.Evade_R then
-        SetEvade(true)
-      end
-    end
-end
+assert(loadstring(CloudDecode("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BAoAAABHZXREYW1hZ2UABAsAAABrYWxhbnN0YWNrAAQDAAAASFAABAUAAABya2lsAAQKAAAATmV0d29ya0lkAAQJAAAAa2lsbGFibGUABAsAAAB1bmtpbGxhYmxlAAQIAAAARXZhZGVfUgAECQAAAFNldEV2YWRlAAAAAACrAAAAdgEAAHYBAAB2AQAAdgEAAHYBAAB2AQAAdgEAAHYBAAB2AQAAdgEAAHYBAAB2AQAAdgEAAHYBAAB2AQAAdwEAAHcBAAB5AQAAeQEAAHkBAAB6AQAAegEAAIIBAACCAQAAggEAAIIBAACCAQAAgwEAAIMBAACEAQAAhAEAAIUBAACFAQAAhwEAAIcBAACHAQAAhwEAAIcBAACIAQAAiAEAAIkBAACJAQAAiwEAAIsBAACLAQAAiwEAAIsBAACLAQAAiwEAAIwBAACMAQAAjAEAAIwBAACMAQAAjAEAAIwBAACMAQAAjAEAAI8BAACPAQAAjwEAAJEBAACRAQAAkQEAAJEBAACRAQAAkQEAAJEBAACSAQAAkgEAAJMBAACTAQAAkwEAAJMBAACTAQAAkwEAAJMBAACUAQAAlAEAAJUBAACVAQAAlQEAAJUBAACVAQAAlQEAAJUBAACWAQAAlgEAAJgBAACbAQAAmwEAAJsBAACbAQAAmwEAAJwBAACcAQAAnAEAAJwBAACdAQAAnQEAAJ0BAACeAQAAngEAAJ4BAACeAQAAngEAAJ4BAACeAQAAnwEAAJ8BAACfAQAAnwEAAJ8BAACgAQAAoAEAAKABAACgAQAAoAEAAKABAACiAQAAogEAAKIBAACiAQAAowEAAKUBAAClAQAApQEAAKUBAACnAQAAqAEAAKgBAACoAQAAqQEAAKkBAACpAQAAqQEAAKkBAACpAQAAqQEAAKoBAACqAQAAqgEAAKoBAACqAQAAqwEAAKsBAACrAQAAqwEAAKsBAACrAQAArQEAAK0BAACtAQAArQEAAK4BAACwAQAAsAEAALABAACwAQAAtQEAALUBAAC1AQAAtQEAALUBAAC1AQAAtgEAALYBAAC2AQAAmwEAALcBAAC5AQAABgAAAAUAAABzZWxmAAAAAACqAAAAEAAAAChmb3IgZ2VuZXJhdG9yKQBdAAAAqgAAAAwAAAAoZm9yIHN0YXRlKQBdAAAAqgAAAA4AAAAoZm9yIGNvbnRyb2wpAF0AAACqAAAAAgAAAGkAXgAAAKgAAAACAAAAdgBeAAAAqAAAAAAAAABFAAAAAgAAAAIAAAACAAAABAAAAAQAAAAEAAAACgAAAAUAAAAMAAAAMwAAAAwAAAA2AAAAVAAAADYAAABXAAAAiAAAAFcAAACKAAAAkwAAAIoAAACWAAAAwAAAAJYAAADDAAAAzwAAAMMAAADRAAAA3QAAANEAAADgAAAA/gAAAOAAAAAAAQAAFwEAAAABAAAZAQAAIAEAABkBAAAjAQAAMAEAACMBAAAyAQAAPwEAADIBAABBAQAATwEAAEEBAABRAQAAUwEAAFEBAABVAQAAXwEAAFUBAABiAQAAZAEAAGIBAABmAQAAaAEAAGYBAABqAQAAbAEAAGoBAABuAQAAcgEAAG4BAAB1AQAAuQEAAHUBAAC5AQAAAAAAAAAAAAAAAAAAAAAAAE5YTl94XzjsHA6KfWhtKfp8aE1JPQJJlGxubWxzVBfcMT4THH1MKeR8aE1KPQFJimxubWxtZDnsHA49LE18GdRMRn1kDSx5pFy3VUrxMFkAANkJEADUSTTGzbAUPQtDTNoB5fEQrfE98b20cW0BkCQ1lX/rENTMfSbhUtWlKWy8vb8WEi7sniCdNk7yZ5J9znccUxYK"), nil, "bt", _ENV))()
