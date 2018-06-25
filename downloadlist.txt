@@ -1,0 +1,13 @@
+https://raw.githubusercontent.com/nguadien/Toirplus/master/DeepIrelia.lua
+https://raw.githubusercontent.com/nguadien/Toirplus/master/DeepKayn.lua
+https://raw.githubusercontent.com/nguadien/Toirplus/master/DeepMalphite.lua
+https://raw.githubusercontent.com/nguadien/Toirplus/master/DeepNunu.lua
+https://raw.githubusercontent.com/nguadien/Toirplus/master/DeepShen.lua
+https://raw.githubusercontent.com/nguadien/Toirplus/master/DeepSinged.lua
+https://raw.githubusercontent.com/nguadien/Toirplus/master/DeepTiamat.lua
+https://raw.githubusercontent.com/nguadien/Toirplus/master/DeepTrundle.lua
+https://raw.githubusercontent.com/nguadien/Toirplus/master/DeepTryndamere.lua
+https://raw.githubusercontent.com/nguadien/Toirplus/master/DeepVeigar.lua
+https://raw.githubusercontent.com/nguadien/Toirplus/master/DeepXinZhao.lua
+https://raw.githubusercontent.com/nguadien/Toirplus/master/DeepYi.lua
+https://raw.githubusercontent.com/nguadien/Toirplus/master/DeepZiggs.lua
